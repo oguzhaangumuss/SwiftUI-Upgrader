@@ -48,6 +48,9 @@ extension Exercise {
     }
 }
 
+
+
+
 struct WorkoutPlan: Identifiable, Codable {
     let id: String
     let date: Timestamp
@@ -64,26 +67,23 @@ struct WorkoutPlan: Identifiable, Codable {
     }
 }
 
+// Progress modelleri
+struct ExerciseSet: Identifiable {
+    let id = UUID()
+    var reps: Int
+    var weight: Double
+    var isCompleted: Bool
+}
 
-/*
-struct Meal: Identifiable, Codable {
+struct ActiveExercise: Identifiable {
     let id: String
-    let userId: String
-    let date: Timestamp
-    let mealType: MealType
-    var foods: [MealFood]
-    let createdAt: Timestamp
-    
-    enum MealType: String, Codable {
-        case breakfast = "Kahvaltı"
-        case lunch = "Öğle Yemeği"
-        case dinner = "Akşam Yemeği"
-        case snack = "Ara Öğün"
-    }
-    
-    struct MealFood: Codable {
-        let foodId: String
-        var portion: Double
-    }
-} 
-*/
+    let exerciseId: String
+    let name: String
+    var sets: [ExerciseSet]
+    var notes: String?
+}
+
+struct ExerciseProgress {
+    var completedSets: [ExerciseSet] = []
+    var currentSetIndex: Int = 0
+}

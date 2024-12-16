@@ -12,13 +12,12 @@ class FirebaseManager: ObservableObject {
     @Published var isLoading = false
     
     private init() {
-        // Firebase'i AppDelegate'de yapılandırdığımız için burada yapılandırmıyoruz
         self.auth = Auth.auth()
         self.firestore = Firestore.firestore()
         
         // Auth state listener
         auth.addStateDidChangeListener { [weak self] _, user in
-            print("👤 Auth state değişti: \(user?.uid ?? "nil")")
+            print(" Auth state değişti: \(user?.uid ?? "nil")")
             if let user = user {
                 Task {
                     await self?.fetchUserData(userId: user.uid)

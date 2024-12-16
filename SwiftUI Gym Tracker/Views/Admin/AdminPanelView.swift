@@ -2,65 +2,48 @@ import SwiftUI
 import FirebaseFirestore
 
 struct AdminPanelView: View {
-    @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = AdminViewModel()
+    @State private var showingExerciseSeeder = false
     
     var body: some View {
-        NavigationView {
-            List {
-                Section(header: Text("Kullanıcılar")) {
-                    ForEach(viewModel.users) { user in
-                        NavigationLink {
-                            AdminUserDetailView(user: user)
-                        } label: {
-                            VStack(alignment: .leading) {
-                                Text(user.fullName)
-                                    .font(.headline)
-                                Text(user.email)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
+        List {
+            Section(header: Text("İstatistikler")) {
+                HStack {
+                    Text("Toplam Kullanıcı")
+                    Spacer()
+                    Text("\(viewModel.users.count)")
+                        .foregroundColor(.secondary)
                 }
                 
-                Section(header: Text("İçerik Yönetimi")) {
-                    NavigationLink("Egzersizler") {
-                        AdminExercisesView()
-                    }
-                    NavigationLink("Yiyecekler") {
-                        AdminFoodsView()
-                    }
+                HStack {
+                    Text("Toplam Egzersiz")
+                    Spacer()
+                    Text("\(viewModel.exerciseCount)")
+                        .foregroundColor(.secondary)
                 }
                 
-                Section(header: Text("İstatistikler")) {
-                    HStack {
-                        Text("Toplam Kullanıcı")
-                        Spacer()
-                        Text("\(viewModel.users.count)")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    HStack {
-                        Text("Toplam Egzersiz")
-                        Spacer()
-                        Text("\(viewModel.exerciseCount)")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    HStack {
-                        Text("Toplam Yiyecek")
-                        Spacer()
-                        Text("\(viewModel.foodCount)")
-                            .foregroundColor(.secondary)
-                    }
+                HStack {
+                    Text("Toplam Yiyecek")
+                    Spacer()
+                    Text("\(viewModel.foodCount)")
+                        .foregroundColor(.secondary)
                 }
             }
-            .navigationTitle("Admin Paneli")
-            .navigationBarItems(trailing: Button("Kapat") { dismiss() })
-            .refreshable {
-                await viewModel.fetchData()
+            
+            Section(header: Text("Veri Yönetimi")) {
+                Button {
+                    showingExerciseSeeder = true
+                } label: {
+                    Label("Egzersiz Yükleyici", systemImage: "square.and.arrow.down.fill")
+                }
             }
+        }
+        .navigationTitle("Admin Paneli")
+        .refreshable {
+            await viewModel.fetchData()
+        }
+        .sheet(isPresented: $showingExerciseSeeder) {
+            AdminExerciseSeederView()
         }
     }
 }

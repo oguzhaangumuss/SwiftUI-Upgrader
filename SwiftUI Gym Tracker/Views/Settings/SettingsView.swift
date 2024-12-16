@@ -11,19 +11,19 @@ struct SettingsView: View {
         NavigationView {
             List {
                 // Profil Düzenleme
-                if let user = currentUser {
-                    Section {
+                Section("Profil") {
+                    if let user = currentUser {
                         NavigationLink {
                             EditProfileView(user: user)
                         } label: {
-                            Label("Profili Düzenle", systemImage: "person.fill")
+                            Label("Profili Düzenle", systemImage: "person.circle")
                         }
                     }
                 }
                 
                 // Admin Paneli (sadece adminler için)
                 if currentUser?.isAdmin == true {
-                    Section {
+                    Section("Yönetim") {
                         NavigationLink {
                             AdminPanelView()
                         } label: {
@@ -33,7 +33,7 @@ struct SettingsView: View {
                 }
                 
                 // Hesap İşlemleri
-                Section {
+                Section("Hesap") {
                     Button(role: .destructive) {
                         showingDeleteAccountAlert = true
                     } label: {
@@ -63,6 +63,22 @@ struct SettingsView: View {
     }
     
     private func deleteAccount() {
-        // Hesap silme işlemi
+        // Hesap silme işlemi burada implement edilecek
+        guard let user = FirebaseManager.shared.auth.currentUser else { return }
+        
+        // Kullanıcının verilerini sil
+        let db = FirebaseManager.shared.firestore
+        db.collection("users").document(user.uid).delete { error in
+            if let error = error {
+                print("❌ Kullanıcı verileri silinirken hata: \(error.localizedDescription)")
+            }
+        }
+        
+        // Firebase Auth hesabını sil
+        user.delete { error in
+            if let error = error {
+                print("❌ Hesap silinirken hata: \(error.localizedDescription)")
+            }
+        }
     }
 } 

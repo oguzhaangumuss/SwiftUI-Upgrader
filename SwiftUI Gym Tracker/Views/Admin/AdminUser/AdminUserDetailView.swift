@@ -17,8 +17,8 @@ struct AdminUserDetailView: View {
             }
             
             Section(header: Text("Fiziksel Bilgiler")) {
-                LabeledContent("Boy", value: "\(Int(user.height)) cm")
-                LabeledContent("Kilo", value: "\(Int(user.weight)) kg")
+                LabeledContent("Boy", value: "\(Int(user.height ?? 0)) cm")
+                LabeledContent("Kilo", value: "\(Int(user.weight ?? 0)) kg")
                 if let initialWeight = user.initialWeight {
                     LabeledContent("Başlangıç Kilosu", value: "\(Int(initialWeight)) kg")
                     LabeledContent("Kilo Değişimi", value: user.weightChangeText)

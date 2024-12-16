@@ -1,0 +1,124 @@
+{
+  "exercises": [
+    {
+      "name": "Bench Press",
+      "description": "Bench Press, göğüs kaslarını geliştirmek için temel bir üst vücut egzersizidir.\n\nTeknik:\n1. Bench'e sırt üstü uzanın, ayaklarınız yerde düz olsun\n2. Omuz genişliğinden biraz daha geniş bir tutuşla barı kavrayın\n3. Barı göğüs hizasına indirirken dirseklerinizi 45-90 derece açıyla tutun\n4. Göğsünüze hafifçe dokundurduktan sonra güçlü bir şekilde yukarı itin\n5. Hareketin sonunda dirseklerinizi tam kilitlemeden tekrarı bitirin\n\nHedef Kaslar:\n- Pectoralis Major (Göğüs)\n- Anterior Deltoid (Ön Omuz)\n- Triceps\n\nİpuçları:\n- Kürek kemiklerinizi bench'e sabitleyin\n- Sırtınızda doğal bir kavis oluşturun\n- Nefes kontrolü önemli: İndirirken nefes alın, iterken verin\n- Ağırlığı kademeli olarak artırın",
+      "muscleGroups": ["Göğüs", "Omuz", "Kol"],
+      "metValue": 6.0
+    },
+    {
+      "name": "Squat",
+      "description": "Squat, alt vücut gücünü geliştiren temel bir bileşik harekettir.\n\nTeknik:\n1. Barı üst sırtınıza yerleştirin (trapezius kası üzerine)\n2. Ayaklar omuz genişliğinde ve ayak parmakları hafif dışa dönük\n3. Göğsünüzü yukarıda tutun ve karın kaslarınızı sıkın\n4. Kalçanızı geriye iterek çömelmeye başlayın\n5. Dizleriniz ayak parmaklarınızı geçmemeli\n6. Uyluklar yere paralel olana kadar inin\n7. Topuklarınızdan güç alarak yukarı itin\n\nHedef Kaslar:\n- Quadriceps\n- Hamstrings\n- Gluteus Maximus\n- Core\n\nİpuçları:\n- Sırtınızı düz tutun\n- Dizlerinizi ayak parmak yönünde tutun\n- Her tekrarda nefes kontrolü yapın\n- Hareketi kontrollü yapın",
+      "muscleGroups": ["Bacak", "Karın"],
+      "metValue": 7.0
+    },
+    {
+      "name": "Deadlift",
+      "description": "Deadlift, tüm vücudu çalıştıran en etkili egzersizlerden biridir.\n\nTeknik:\n1. Ayaklar kalça genişliğinde açık, bar ayaklarınızın önünde\n2. Dizlerinizi bükerek barı kavrayın\n3. Göğsünüzü yukarıda, sırtınızı düz tutun\n4. Barı bacaklarınıza yakın tutarak kaldırın\n5. Kalça ve dizleri aynı anda düzleştirin\n6. Hareketin sonunda omuzlarınızı geriye çekin\n7. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Erector Spinae (Sırt)\n- Gluteus Maximus\n- Hamstrings\n- Quadriceps\n- Trapezius\n\nİpuçları:\n- Her zaman sırtınızı düz tutun\n- Ağırlığı bacaklarınıza yakın tutun\n- Kaldırırken nefes verin\n- Ağırlığı kontrollü indirin",
+      "muscleGroups": ["Sırt", "Bacak"],
+      "metValue": 8.0
+    },
+    {
+      "name": "Military Press",
+      "description": "Military Press, omuz kaslarını geliştiren temel bir üst vücut egzersizidir.\n\nTeknik:\n1. Ayakta, barı göğüs hizasında tutun\n2. Ayaklar omuz genişliğinde açık\n3. Core kaslarınızı sıkın ve poponuzu hafifçe içeri çekin\n4. Barı başınızın üzerine doğru güçlü bir şekilde itin\n5. Tam uzatma noktasında kısa bir duraksama yapın\n6. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Deltoids (Omuz)\n- Triceps\n- Upper Trapezius\n- Core\n\nİpuçları:\n- Sırtınızı aşırı germeyin\n- Başınızı öne eğmeyin\n- Omuzlarınızı sıkıştırmayın\n- Her tekrarda nefes kontrolü yapın",
+      "muscleGroups": ["Omuz", "Kol", "Karın"],
+      "metValue": 6.0
+    },
+    {
+      "name": "Pull-ups",
+      "description": "Pull-ups, sırt ve kol kaslarını geliştiren etkili bir vücut ağırlığı egzersizidir.\n\nTeknik:\n1. Bar'ı omuz genişliğinde kavrayın\n2. Vücudunuzu tamamen asılı pozisyona getirin\n3. Kürek kemiklerinizi sıkarak harekete başlayın\n4. Çenenizi barın üzerine çıkarana kadar kendinizi yukarı çekin\n5. Tepe noktada kısa bir duraksama yapın\n6. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Latissimus Dorsi\n- Biceps\n- Rear Deltoids\n- Core\n\nİpuçları:\n- Hareketi sallanmadan yapın\n- Her tekrarda tam açılın\n- Negatif tekrarlarla başlayın\n- Düzenli nefes alın",
+      "muscleGroups": ["Sırt", "Kol", "Karın"],
+      "metValue": 5.0
+    },
+    {
+      "name": "Barbell Row",
+      "description": "Barbell Row, sırt kaslarını güçlendiren temel bir egzersizdir.\n\nTeknik:\n1. Ayaklar omuz genişliğinde, dizler hafif bükülü\n2. Üst vücudu 45 derece öne eğin\n3. Barı omuz genişliğinde kavrayın\n4. Sırtınızı düz tutarak barı göğsünüze doğru çekin\n5. Dirseklerinizi vücudunuza yakın tutun\n6. Kürek kemiklerinizi sıkıştırın\n7. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Latissimus Dorsi\n- Rhomboids\n- Trapezius\n- Rear Deltoids\n\nİpuçları:\n- Sırtınızı her zaman düz tutun\n- Kalçalarınızı sabit tutun\n- Her tekrarda kürek kemiklerinizi sıkın\n- Ağırlığı kontrollü indirin",
+      "muscleGroups": ["Sırt", "Omuz"],
+      "metValue": 6.0
+    },
+    {
+      "name": "Dumbbell Lunges",
+      "description": "Dumbbell Lunges, bacak kaslarını dengeli şekilde geliştiren bir egzersizdir.\n\nTeknik:\n1. Her iki elinizde dumbbell'larla dik durun\n2. Büyük bir adım atın\n3. Arka diz yere değecek kadar alçalın\n4. Ön bacağınız 90 derece açı oluştursun\n5. Ön bacağınızla iterek başlangıç pozisyonuna dönün\n6. Diğer bacakla tekrarlayın\n\nHedef Kaslar:\n- Quadriceps\n- Hamstrings\n- Gluteus Maximus\n- Kalça Kasları\n\nİpuçları:\n- Üst vücudunuzu dik tutun\n- Ön diz ayak parmak ucunu geçmesin\n- Dengeli ve kontrollü hareket edin\n- Her iki bacağa eşit yüklenin",
+      "muscleGroups": ["Bacak"],
+      "metValue": 5.5
+    },
+    {
+      "name": "Dips",
+      "description": "Dips, göğüs ve triceps kaslarını geliştiren etkili bir vücut ağırlığı egzersizidir.\n\nTeknik:\n1. Paralel barlara tutunun\n2. Kolları kilitleyerek başlayın\n3. Göğsünüzü hafif öne eğin\n4. Dirseklerinizi bükerek alçalın\n5. Omuz seviyesinin altına inin\n6. Güçlü şekilde yukarı itin\n\nHedef Kaslar:\n- Alt Göğüs\n- Triceps\n- Ön Deltoid\n- Core\n\nİpuçları:\n- Omuzlarınızı aşağıda tutun\n- Kontrolü kaybetmeyin\n- Başlangıçta asiste kullanın\n- Düzenli nefes alın",
+      "muscleGroups": ["Göğüs", "Kol", "Omuz"],
+      "metValue": 4.0
+    },
+    {
+      "name": "Face Pull",
+      "description": "Face Pull, arka omuz ve üst sırt kaslarını hedefleyen önemli bir egzersizdir.\n\nTeknik:\n1. Cable machine'de yüksek bir noktaya ip bağlayın\n2. İpi her iki elinizle kavrayın\n3. Dirseklerinizi yanlara açarak çekin\n4. İpi yüzünüze doğru getirin\n5. Kürek kemiklerinizi sıkıştırın\n6. Kontrollü şekilde geri bırakın\n\nHedef Kaslar:\n- Rear Deltoids\n- Upper Trapezius\n- Rhomboids\n- Rotator Cuff\n\nİpuçları:\n- Dirseklerinizi yüksekte tutun\n- Omuzlarınızı geriye çekin\n- Yavaş ve kontrollü hareket edin\n- Her tekrarda sıkıştırma yapın",
+      "muscleGroups": ["Omuz", "Sırt"],
+      "metValue": 4.0
+    },
+    {
+      "name": "Leg Press",
+      "description": "Leg Press, bacak kaslarını güvenli ve etkili şekilde çalıştıran bir makine egzersizidir.\n\nTeknik:\n1. Makineye oturun ve ayaklarınızı platformda omuz genişliğinde yerleştirin\n2. Dizlerinizi 90 derece açıyla başlayın\n3. Platformu kontrollü şekilde itin\n4. Dizleri tam kilitlemeden tepe noktada durun\n5. Yavaşça başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Quadriceps\n- Hamstrings\n- Gluteus Maximus\n- Kalça Kasları\n\nİpuçları:\n- Sırtınızı koltuğa yaslayın\n- Dizleri tam kilitlemeyin\n- Nefes kontrolüne dikkat edin\n- Ağırlığı kademeli artırın",
+      "muscleGroups": ["Bacak"],
+      "metValue": 6.5
+    },
+    {
+      "name": "Lat Pulldown",
+      "description": "Lat Pulldown, sırt kaslarını geliştirmek için ideal bir makine egzersizidir.\n\nTeknik:\n1. Makineye oturun ve bacaklarınızı pedlerin altına sabitleyin\n2. Barı omuz genişliğinden biraz geniş kavrayın\n3. Göğsünüzü yukarıda tutun ve hafifçe geriye yaslanın\n4. Barı göğsünüzün üst kısmına doğru çekin\n5. Kürek kemiklerinizi sıkıştırın\n6. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Latissimus Dorsi\n- Teres Major\n- Rhomboids\n- Biceps\n\nİpuçları:\n- Sırtınızı düz tutun\n- Dirseklerinizi vücuda yakın tutun\n- Omuzları aşağıda tutun\n- Her tekrarda tam açılın",
+      "muscleGroups": ["Sırt", "Kol"],
+      "metValue": 4.0
+    },
+    {
+      "name": "Incline Dumbbell Press",
+      "description": "Incline Dumbbell Press, üst göğüs kaslarını hedefleyen etkili bir egzersizdir.\n\nTeknik:\n1. Bench'i 30-45 derece açıyla ayarlayın\n2. Sırt üstü uzanın ve dumbbell'ları göğüs hizasında tutun\n3. Avuç içleri ileri bakar şekilde başlayın\n4. Dumbbell'ları kontrollü şekilde indirin\n5. Göğsün üst k��smına değdirmeden geri itin\n6. Tepe noktada hafif duraksayın\n\nHedef Kaslar:\n- Üst Pectoralis Major\n- Anterior Deltoid\n- Triceps\n\nİpuçları:\n- Omuzları bench'e sabitleyin\n- Dirsekleri kontrol edin\n- Bilek pozisyonuna dikkat\n- Nefes kontrolü yapın",
+      "muscleGroups": ["Göğüs", "Omuz", "Kol"],
+      "metValue": 5.0
+    },
+    {
+      "name": "Romanian Deadlift",
+      "description": "Romanian Deadlift, arka bacak kaslarını hedefleyen özel bir deadlift varyasyonudur.\n\nTeknik:\n1. Barı kalça hizasında tutun\n2. Dizleri çok az bükün ve sabitleyin\n3. Kalçalardan öne doğru eğilin\n4. Barı bacaklarınıza yakın tutun\n5. Baldır ortasına kadar indirin\n6. Kalça iterişiyle yukarı dönün\n\nHedef Kaslar:\n- Hamstrings\n- Gluteus Maximus\n- Lower Back\n- Core\n\nİpuçları:\n- Sırtı düz tutun\n- Dizleri çok bükmeden yapın\n- Bar bacağa yakın olsun\n- Kalçadan hareket edin",
+      "muscleGroups": ["Bacak", "Sırt", "Karın"],
+      "metValue": 7.0
+    },
+    {
+      "name": "Cable Crossover",
+      "description": "Cable Crossover, göğüs kaslarını izole eden ve şekillendiren bir egzersizdir.\n\nTeknik:\n1. İki cable machine arasında durun\n2. Kolları yanlarda açık başlayın\n3. Hafif öne eğilin ve göğsü çıkarın\n4. Kolları kavis çizerek önde birleştirin\n5. Göğüs kaslarını sıkın\n6. Yavaşça başlangıca dönün\n\nHedef Kaslar:\n- İç Göğüs\n- Alt Göğüs\n- Anterior Deltoid\n\nİpuçları:\n- Dirsekleri hafif bükün\n- Göğsü yukarıda tutun\n- Hareketi hissedin\n- Kontrollü açın",
+      "muscleGroups": ["Göğüs", "Omuz"],
+      "metValue": 4.5
+    },
+    {
+      "name": "Hammer Curls",
+      "description": "Hammer Curls, biceps ve ön kol kaslarını geliştiren etkili bir egzersizdir.\n\nTeknik:\n1. Dumbbell'ları yanlarda tutun\n2. Avuç içleri birbirine bakar pozisyonda\n3. Dirsekler sabit kalacak şekilde kaldırın\n4. Tepe noktada biceps'i sıkın\n5. Kontrollü şekilde indirin\n\nHedef Kaslar:\n- Biceps Brachii\n- Brachialis\n- Ön Kol Kasları\n\nİpuçları:\n- Üst kolu sabit tutun\n- Bileği bükmeden yapın\n- Her kolu eşit çalıştırın\n- Momentum kullanmayın",
+      "muscleGroups": ["Kol"],
+      "metValue": 3.5
+    },
+    {
+      "name": "Triceps Pushdown",
+      "description": "Triceps Pushdown, triceps kaslarını izole eden etkili bir egzersizdir.\n\nTeknik:\n1. Cable machine'de yüksek bir noktaya bar bağlayın\n2. Üst kolları vücuda sabitleyerek barı kavrayın\n3. Dirseklerden başlayarak barı aşağı itin\n4. Tam uzatma noktasında triceps'i sıkın\n5. Kontrollü şekilde başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Triceps Brachii\n- Anconeus\n\nİpuçları:\n- Dirsekleri vücuda yakın tutun\n- Üst kolu sabit tutun\n- Her tekrarda tam uzatın\n- Momentum kullanmayın",
+      "muscleGroups": ["Kol"],
+      "metValue": 3.0
+    },
+    {
+      "name": "Leg Extensions",
+      "description": "Leg Extensions, quadriceps kaslarını izole eden bir makine egzersizidir.\n\nTeknik:\n1. Makinede oturun ve ayak bileklerinizi pedlere yerleştirin\n2. Sırtınızı koltuğa yaslayın\n3. Dizlerinizi tam uzatın\n4. Tepe noktada quadriceps'i sıkın\n5. Yavaşça başlangıç pozisyonuna dönün\n\nHedef Kaslar:\n- Quadriceps\n- Vastus Lateralis\n- Vastus Medialis\n- Rectus Femoris\n\nİpuçları:\n- Tam hareket açısı kullanın\n- Kontrollü hareket edin\n- Dizleri tam kilitlemeyin\n- Ağırlığı kademeli artırın",
+      "muscleGroups": ["Bacak"],
+      "metValue": 4.0
+    },
+    {
+      "name": "Plank",
+      "description": "Plank, core kaslarını güçlendiren temel bir statik egzersizdir.\n\nTeknik:\n1. Dirsekler ve ayak parmakları üzerinde pozisyon alın\n2. Dirsekler omuz altında olmalı\n3. Vücut düz bir çizgi oluşturmalı\n4. Karın kaslarını sıkın\n5. Kalçayı düşürmeden pozisyonu koruyun\n\nHedef Kaslar:\n- Rectus Abdominis\n- Transverse Abdominis\n- Obliques\n- Lower Back\n\nİpuçları:\n- Nefes alıp vermeyi unutmayın\n- Kalçayı düşürmeyin\n- Boynunuzu düz tutun\n- Süreyi kademeli artırın",
+      "muscleGroups": ["Karın"],
+      "metValue": 3.5
+    },
+    {
+      "name": "Lateral Raises",
+      "description": "Lateral Raises, orta deltoid kaslarını geliştiren izolasyon egzersizidir.\n\nTeknik:\n1. Dumbbell'ları yanlarda tutun\n2. Dirsekleri hafif bükerek kolları yanlara kaldırın\n3. Omuz hizasına kadar yükseltin\n4. Tepe noktada kısa duraksayın\n5. Kontrollü şekilde indirin\n\nHedef Kaslar:\n- Middle Deltoid\n- Anterior Deltoid\n- Trapezius\n\nİpuçları:\n- Hafif ağırlıkla başlayın\n- Momentum kullanmayın\n- Bilek pozisyonuna dikkat\n- Form bozulmadan yapın",
+      "muscleGroups": ["Omuz"],
+      "metValue": 3.5
+    },
+    {
+      "name": "Crunches",
+      "description": "Crunches, karın kaslarını hedefleyen temel bir egzersizdir.\n\nTeknik:\n1. Sırt üstü uzanın, dizler bükülü\n2. Ellerinizi başınızın arkasında gevşek tutun\n3. Karın kaslarını kullanarak üst vücudu kaldırın\n4. Omuzları yerden kaldırın\n5. Tepe noktada sıkın\n6. Kontrollü şekilde başlangıca dönün\n\nHedef Kaslar:\n- Upper Rectus Abdominis\n- Lower Rectus Abdominis\n- Obliques\n\nİpuçları:\n- Boynu zorlamayın\n- Kaliteye odaklanın\n- Nefes kontrolü yapın\n- Karından güç alın",
+      "muscleGroups": ["Karın"],
+      "metValue": 3.0
+    }
+  ]
+} 

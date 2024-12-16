@@ -1,17 +1,11 @@
 import SwiftUI
-import Combine
 import FirebaseFirestore
 
 class ExercisesViewModel: ObservableObject {
-    @Published private(set) var exercises: [Exercise] = []
+    @Published var exercises: [Exercise] = []
     @Published var isLoading = false
-    @Published var alertItem: AlertItem?
     
-    private let exerciseService: ExerciseService
-    private var cancellables = Set<AnyCancellable>()
-    
-    init(exerciseService: ExerciseService = FirebaseExerciseService()) {
-        self.exerciseService = exerciseService
+    init() {
         Task {
             await fetchExercises()
         }
@@ -20,20 +14,17 @@ class ExercisesViewModel: ObservableObject {
     @MainActor
     func fetchExercises() async {
         isLoading = true
+        
         do {
-            exercises = try await exerciseService.fetchExercises()
+            let snapshot = try await FirebaseManager.shared.firestore
+                .collection("exercises")
+                .getDocuments()
+            
+            exercises = snapshot.documents.compactMap { try? $0.data(as: Exercise.self) }
         } catch {
-            alertItem = AlertItem(
-                title: "Hata",
-                message: ExerciseError.fetchFailed.localizedDescription,
-                dismissButton: .default(Text("Tamam"))
-            )
+            print("Egzersizler getirilemedi: \(error)")
         }
+        
         isLoading = false
-    }
-    
-    func filteredExercises(for muscleGroup: MuscleGroup?) -> [Exercise] {
-        guard let muscleGroup = muscleGroup else { return exercises }
-        return exercises.filter { $0.muscleGroups.contains(muscleGroup) }
     }
 } 

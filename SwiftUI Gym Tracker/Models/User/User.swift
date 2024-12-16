@@ -5,9 +5,9 @@ struct User: Identifiable, Codable {
     let email: String
     let firstName: String
     let lastName: String
-    let age: Int
-    let height: Double
-    var weight: Double
+    let age: Int?
+    let height: Double?
+    var weight: Double?
     var isAdmin: Bool
     let createdAt: Timestamp?
     let updatedAt: Timestamp?
@@ -67,16 +67,21 @@ struct User: Identifiable, Codable {
     }
     
     var weightChange: Double {
-        guard let initialWeight = initialWeight else { return 0 }
-        return weight - initialWeight
+        guard let initialWeight = initialWeight,
+              let currentWeight = weight else { return 0 }
+        return currentWeight - initialWeight
     }
     
     var weightChangeText: String {
-        guard let initialWeight = initialWeight else { return "Başlangıç kilosu girilmemiş" }
-        let change = abs(weight - initialWeight)
-        if weight > initialWeight {
+        guard let initialWeight = initialWeight,
+              let currentWeight = weight else { 
+            return "Başlangıç kilosu girilmemiş" 
+        }
+        
+        let change = abs(currentWeight - initialWeight)
+        if currentWeight > initialWeight {
             return "+\(String(format: "%.1f", change)) kg"
-        } else if weight < initialWeight {
+        } else if currentWeight < initialWeight {
             return "-\(String(format: "%.1f", change)) kg"
         }
         return "Değişim yok"

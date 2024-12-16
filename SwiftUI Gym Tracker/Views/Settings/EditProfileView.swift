@@ -19,9 +19,9 @@ struct EditProfileView: View {
         self.user = user
         _firstName = State(initialValue: user.firstName)
         _lastName = State(initialValue: user.lastName)
-        _age = State(initialValue: String(user.age))
-        _height = State(initialValue: String(user.height))
-        _weight = State(initialValue: String(user.weight))
+        _age = State(initialValue: String(user.age ?? 0))
+        _height = State(initialValue: String(user.height ?? 0))
+        _weight = State(initialValue: String(user.weight ?? 0))
     }
     
     var body: some View {
@@ -39,6 +39,12 @@ struct EditProfileView: View {
                         .keyboardType(.decimalPad)
                     TextField("Kilo (kg)", text: $weight)
                         .keyboardType(.decimalPad)
+                }
+                if user.age == 0 || user.height == 0 || user.weight == 0 {
+                    Section {
+                        Text("Lütfen eksik bilgileri tamamlayınız.")
+                            .foregroundColor(.orange)
+                    }
                 }
                 
                 if !errorMessage.isEmpty {

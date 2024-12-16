@@ -108,37 +108,3 @@ struct AdminExercisesView: View {
         }
     }
 }
-
-// MARK: - Supporting Views
-private struct ExerciseRowView: View {
-    let exercise: Exercise
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(exercise.name)
-                .font(.headline)
-            
-            Text("Oluşturan: \(exercise.createdBy)")
-                .font(.caption)
-                .foregroundColor(.secondary)
-            
-            HStack {
-                Text(exercise.muscleGroups.map { $0.rawValue }.joined(separator: ", "))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                if let rating = exercise.averageRating {
-                    HStack(spacing: 2) {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.yellow)
-                        Text(String(format: "%.1f", rating))
-                            .font(.caption)
-                    }
-                }
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}

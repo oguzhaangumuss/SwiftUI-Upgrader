@@ -6,6 +6,13 @@ struct AdminTabView: View {
     var body: some View {
         TabView {
             NavigationView {
+                AdminPanelView()
+            }
+            .tabItem {
+                Label("Panel", systemImage: "gauge")
+            }
+            
+            NavigationView {
                 AdminExercisesView()
             }
             .tabItem {

@@ -2,7 +2,7 @@
 //  SwiftUI_Gym_TrackerApp.swift
 //  SwiftUI Gym Tracker
 //
-//  Created by oguzhangumus on 3.12.2024.
+//  Created by oguzhangumus on 3.11.2024.
 //
 
 import SwiftUI
