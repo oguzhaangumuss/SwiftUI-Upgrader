@@ -19,4 +19,16 @@ struct TemplateExercise: Identifiable, Codable, Equatable {
         lhs.weight == rhs.weight &&
         lhs.notes == rhs.notes
     }
+    
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "exerciseId": exerciseId,
+            "exerciseName": exerciseName,
+            "sets": sets,
+            "reps": reps,
+            "weight": weight as Any,  // Optional olduğu için Any olarak cast ediyoruz
+            "notes": notes as Any     // Optional olduğu için Any olarak cast ediyoruz
+        ]
+    }
 } 
