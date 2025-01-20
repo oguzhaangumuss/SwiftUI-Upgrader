@@ -31,7 +31,7 @@ class CalorieBalanceViewModel: ObservableObject {
         // Yakılan kalorileri hesapla
         do {
             let snapshot = try await FirebaseManager.shared.firestore
-                .collection("userExercises")
+                .collection("workoutHistory")
                 .whereField("userId", isEqualTo: userId)
                 .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: today))
                 .whereField("date", isLessThan: Timestamp(date: tomorrow))
@@ -41,11 +41,19 @@ class CalorieBalanceViewModel: ObservableObject {
             var activityStats: [String: Double] = [:]
             
             for document in snapshot.documents {
-                if let workout = try? document.data(as: UserExercise.self),
-                   let calories = workout.caloriesBurned {
+                // Firestore'dan WorkoutHistory türüne dönüştürme
+                if let workout = try? document.data(as: WorkoutHistory.self) {
+                    let calories = workout.caloriesBurned
                     totalBurned += calories
-                    let exerciseName = workout.exerciseName ?? "Diğer"
-                    activityStats[exerciseName, default: 0] += calories
+                    
+                    // Egzersizlerin isimlerini ve kalorileri toplamak için döngü
+                    for exercise in workout.exercises {
+                        let exerciseName = exercise.exerciseName
+                        
+                        // Her egzersiz seti başına yakılan kaloriyi hesapla
+                        let exerciseCalories = (calories / Double(workout.exercises.count))
+                        activityStats[exerciseName, default: 0] += exerciseCalories
+                    }
                 }
             }
             

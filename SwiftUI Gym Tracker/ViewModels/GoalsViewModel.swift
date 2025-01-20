@@ -15,9 +15,9 @@ class GoalsViewModel: ObservableObject {
     }
     
     // MARK: - Published Properties
-    @Published var currentCalories: Double = 0
-    @Published var currentWorkouts: Double = 0
-    @Published var currentWeight: Double = 0
+    @Published var caloriesBurned: Double = 0
+    @Published var workouts: Int = 0
+    @Published var weight: Double = 0
     
     @Published var calorieGoal: Double?
     @Published var workoutGoal: Double?
@@ -26,12 +26,57 @@ class GoalsViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage = ""
     
-    // MARK: - Initialization
-    init() {
-        fetchGoals()
+    // Haftalık antrenman verilerini çekmek için yeni bir fonksiyon
+    @MainActor
+    func fetchWeeklyWorkoutData() async {
+        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
+        
+        let calendar = Calendar.current
+        let today = Date()
+        // Haftanın başlangıç tarihini al (Pazartesi)
+        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today)) ?? today
+        // Haftanın bitiş tarihini al (Pazar)
+        let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart) ?? today
+        
+        do {
+            let snapshot = try await FirebaseManager.shared.firestore
+                .collection("workoutHistory")
+                .whereField("userId", isEqualTo: userId)
+                .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: weekStart))
+                .whereField("date", isLessThan: Timestamp(date: weekEnd))
+                .getDocuments()
+            
+            var totalCalories: Double = 0
+            var workoutCount: Int = 0
+            
+            for document in snapshot.documents {
+                if let workout = try? document.data(as: WorkoutHistory.self) {
+                    totalCalories += workout.caloriesBurned ?? 0
+                    workoutCount += 1  // Her workout dökümanı bir antrenmanı temsil eder
+                }
+            }
+            
+            // Ana thread'de UI güncellemesi
+            await MainActor.run {
+                self.caloriesBurned = totalCalories
+                self.workouts = workoutCount
+                self.isLoading = false
+            }
+            
+            print("📊 Haftalık İstatistikler:")
+            print("   Yakılan Kalori: \(totalCalories)")
+            print("   Antrenman Sayısı: \(workoutCount)")
+            
+        } catch {
+            await MainActor.run {
+                self.errorMessage = "Antrenman verileri alınamadı"
+                self.isLoading = false
+            }
+            print("❌ Antrenman verileri alınamadı: \(error)")
+        }
     }
     
-    // MARK: - Methods
+    // Hedefleri çekmek için mevcut fonksiyon
     func fetchGoals() {
         guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
         isLoading = true
@@ -45,9 +90,11 @@ class GoalsViewModel: ObservableObject {
                 
                 if let user = try? doc.data(as: User.self) {
                     await MainActor.run {
-                        self.calorieGoal = Double(user.calorieGoal ?? 0)
-                        self.workoutGoal = Double(user.workoutGoal ?? 0)
+                        
+                        self.calorieGoal = Double(user.calorieGoal ?? 1)
+                        self.workoutGoal = Double(user.workoutGoal ?? 1)
                         self.weightGoal = user.weightGoal
+                        self.weight = user.weight ?? 1
                         self.isLoading = false
                     }
                 }
@@ -74,9 +121,9 @@ class GoalsViewModel: ObservableObject {
     
     var progress: Progress {
         Progress(
-            calorieProgress: calorieGoal.map { GoalProgress(current: currentCalories, target: $0) },
-            workoutProgress: workoutGoal.map { GoalProgress(current: currentWorkouts, target: $0) },
-            weightProgress: weightGoal.map { GoalProgress(current: currentWeight, target: $0) }
+            calorieProgress: calorieGoal.map { GoalProgress(current: caloriesBurned, target: $0) },
+            workoutProgress: workoutGoal.map { GoalProgress(current: Double(workouts), target: $0) },
+            weightProgress: weightGoal.map { GoalProgress(current: weight, target: $0) }
         )
     }
     
@@ -110,4 +157,6 @@ class GoalsViewModel: ObservableObject {
         
         isLoading = false
     }
-} 
+    
+    
+}

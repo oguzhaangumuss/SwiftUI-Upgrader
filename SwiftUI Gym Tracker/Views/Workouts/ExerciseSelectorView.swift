@@ -3,7 +3,7 @@ import SwiftUI
 struct ExerciseSelectorView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ExercisesViewModel()
-    @Binding var selectedExercises: [TemplateExercise]
+    var onSelect: (Exercise) -> Void
     @State private var searchText = ""
     @State private var selectedMuscleGroup: MuscleGroup?
     
@@ -56,19 +56,12 @@ struct ExerciseSelectorView: View {
     }
     
     private func selectExercise(_ exercise: Exercise) {
-        guard let exerciseId = exercise.id,
-              !selectedExercises.contains(where: { $0.exerciseId == exerciseId }) else { return }
-        
-        let templateExercise = TemplateExercise(
-            id: UUID().uuidString,
-            exerciseId: exerciseId,
-            exerciseName: exercise.name,
-            sets: 3,
-            reps: 10,
-            weight: nil,
-            notes: nil
-        )
-        selectedExercises.append(templateExercise)
+        onSelect(exercise)
         dismiss()
     }
 }
+
+#Preview {
+    ExerciseSelectorView { _ in }
+}
+    

@@ -2,75 +2,113 @@ import SwiftUI
 import FirebaseFirestore
 
 class ActiveWorkoutViewModel: ObservableObject {
-    @Published var exercises: [ActiveExercise] = []
-    @Published var selectedTemplate: WorkoutTemplate?
-    @Published var progress: [String: ExerciseProgress] = [:]
-    @Published var isLoading = false
-    @Published var errorMessage = ""
+    @Published var exercises: [ActiveWorkoutExercise] = []
+    @Published var elapsedTime: TimeInterval = 0
+    private var timer: Timer?
+    private var startTime: Date = Date()
+    @Published var workoutName: String = "Antrenman"
     
-    private let db = FirebaseManager.shared.firestore
+    func setupExercises(_ exercises: [ActiveWorkoutExercise]) {
+        self.exercises = exercises
+        startTime = Date()
+        startTimer()
+    }
     
-    func loadTemplate(_ template: WorkoutTemplate) {
-        selectedTemplate = template
-        exercises = template.exercises.map { templateExercise in
-            ActiveExercise(
-                id: UUID().uuidString,
-                exerciseId: templateExercise.exerciseId,
-                name: templateExercise.exerciseName,
-                sets: Array(repeating: ExerciseSet(
-                    reps: templateExercise.reps,
-                    weight: templateExercise.weight ?? 0,
-                    isCompleted: false
-                ), count: templateExercise.sets),
-                notes: templateExercise.notes
-            )
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.elapsedTime = Date().timeIntervalSince(self?.startTime ?? Date())
         }
     }
     
-    func updateProgress(for exerciseId: String, progress: ExerciseProgress) {
-        self.progress[exerciseId] = progress
-    }
-    
-    @MainActor
     func saveWorkout() async {
-        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
+        if exercises.count == 1 {
+            workoutName = exercises[0].exerciseName
+        }
         
-        isLoading = true
-        errorMessage = ""
+        let workoutHistory = WorkoutHistory(
+            id: UUID().uuidString,
+            userId: FirebaseManager.shared.currentUser?.id ?? "",
+            templateId: nil,
+            templateName: workoutName,
+            date: Timestamp(date: Date()),
+            duration: elapsedTime,
+            totalWeight: calculateTotalWeight(),
+            caloriesBurned: await calculateCaloriesBurned(duration: elapsedTime),
+            exercises: exercises.map { exercise in
+                WorkoutHistory.HistoryExercise(
+                    id: UUID().uuidString,
+                    exerciseId: exercise.exerciseId,
+                    exerciseName: exercise.exerciseName,
+                    sets: exercise.sets.count,
+                    weight: exercise.sets.first?.weight ?? 0
+                )
+            }
+        )
         
         do {
-            for exercise in exercises {
-                let exerciseProgress = progress[exercise.id] ?? .init()
-                
-                // Sadece en az bir set tamamlanmış egzersizleri kaydet
-                guard !exerciseProgress.completedSets.isEmpty else { continue }
-                
-                let exerciseData: [String: Any] = [
-                    "userId": userId,
-                    "exerciseId": exercise.exerciseId,
-                    "exerciseName": exercise.name,
-                    "sets": exerciseProgress.completedSets.count,
-                    "reps": exerciseProgress.completedSets.first?.reps ?? 0,
-                    "weight": exerciseProgress.completedSets.first?.weight ?? 0,
-                    "date": Timestamp(),
-                    "notes": exercise.notes ?? "",
-                    "duration": 0, // Varsayılan süre
-                    "createdAt": Timestamp()
-                ]
-                
-                try await db.collection("userExercises")
-                    .addDocument(data: exerciseData)
-            }
+            try await FirebaseManager.shared.firestore
+                .collection("workoutHistory")
+                .document(workoutHistory.id)
+                .setData(workoutHistory.toDictionary())
+            
+            print("✅ Antrenman başarıyla kaydedildi")
         } catch {
-            errorMessage = "Antrenman kaydedilemedi"
-            print("❌ Antrenman kaydetme hatası: \(error)")
+            print("❌ Antrenman kaydedilirken hata: \(error.localizedDescription)")
         }
-        
-        isLoading = false
     }
     
-    func fetchWorkoutTemplates(for template: WorkoutTemplate) {
-        // ... implementation ...
+    private func calculateTotalWeight() -> Double {
+        var total: Double = 0
+        for exercise in exercises {
+            for set in exercise.sets {
+                total += set.weight
+            }
+        }
+        return total
+    }
+    
+    private func calculateCaloriesBurned(duration: TimeInterval) async -> Double {
+        // Her egzersiz için kalori hesapla
+        var totalCalories: Double = 0
+        
+        for exercise in exercises {
+            if let exerciseData = try? await FirebaseManager.shared.firestore
+                .collection("exercises")
+                .document(exercise.exerciseId)
+                .getDocument()
+                .data(as: Exercise.self) {
+                
+                if let calories = exerciseData.calculateCalories(
+                    weight: FirebaseManager.shared.currentUser?.weight ?? 70,
+                    duration: duration
+                ) {
+                    totalCalories += calories
+                }
+            }
+        }
+        
+        return totalCalories
+    }
+    
+    func resetTimer() {
+        startTime = Date()
+        elapsedTime = 0
+    }
+    
+    func removeExercise(_ exercise: ActiveWorkoutExercise) {
+        exercises.removeAll { $0.id == exercise.id }
+        
+        // Eğer son egzersiz silindiyse antrenman adını güncelle
+        if exercises.isEmpty {
+            workoutName = "Antrenman"
+        } else if exercises.count == 1 {
+            // Tek egzersiz kaldıysa onun adını kullan
+            workoutName = exercises[0].exerciseName
+        }
+    }
+    
+    deinit {
+        timer?.invalidate()
     }
 }
 

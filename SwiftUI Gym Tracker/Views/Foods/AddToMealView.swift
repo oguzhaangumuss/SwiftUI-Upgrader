@@ -132,6 +132,8 @@ struct AddToMealView: View {
         
         guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
         
+        let totalCalories = food.calories * portionDouble
+        
         let mealData: [String: Any] = [
             "userId": userId,
             "mealType": selectedMealType.rawValue,
@@ -140,6 +142,7 @@ struct AddToMealView: View {
                 "foodId": food.id!,
                 "portion": portionDouble
             ]],
+            "totalCalories": totalCalories,
             "createdAt": Timestamp()
         ]
         

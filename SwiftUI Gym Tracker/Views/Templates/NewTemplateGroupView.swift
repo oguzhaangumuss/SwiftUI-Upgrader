@@ -2,10 +2,17 @@ import SwiftUI
 import FirebaseFirestore
 
 struct NewTemplateGroupView: View {
+    let onGroupCreated: (String) -> Void
+    
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel = TemplateGroupsViewModel()
     @State private var groupName = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    
+    init(onGroupCreated: @escaping (String) -> Void) {
+        self.onGroupCreated = onGroupCreated
+    }
     
     var body: some View {
         NavigationView {
@@ -39,30 +46,22 @@ struct NewTemplateGroupView: View {
     }
     
     private func createGroup() {
-        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
         isLoading = true
-        
-        let data: [String: Any] = [
-            "name": groupName,
-            "userId": userId,
-            "createdAt": Timestamp(),
-            "updatedAt": Timestamp()
-        ]
         
         Task {
             do {
-                _ = try await FirebaseManager.shared.firestore
-                    .collection("templateGroups")
-                    .addDocument(data: data)
-                
+                let groupId = try await viewModel.createGroup(name: groupName)
                 await MainActor.run {
-                    NotificationCenter.default.post(name: .groupCreated, object: nil)
+                    onGroupCreated(groupId)
                     dismiss()
                 }
             } catch {
-                errorMessage = "Grup oluşturulamadı: \(error.localizedDescription)"
+                errorMessage = error.localizedDescription
                 isLoading = false
             }
         }
     }
 } 
+#Preview {
+    NewTemplateGroupView(onGroupCreated: { _ in })
+}

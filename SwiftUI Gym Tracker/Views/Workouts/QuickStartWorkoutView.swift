@@ -1,145 +1,181 @@
 import SwiftUI
-import FirebaseFirestore
 
 struct QuickStartWorkoutView: View {
+    @StateObject private var viewModel = ActiveWorkoutViewModel()
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = QuickStartWorkoutViewModel()
     @State private var showingExerciseSelector = false
-    @State private var workoutNotes = ""
+    @State private var showingFinishAlert = false
+    @State private var showingSaveTemplateSheet = false
     
     var body: some View {
-        NavigationView {
-            Form {
-                exercisesSection
-                notesSection
-                errorSection
+        VStack(spacing: 0) {
+            workoutHeaderView
+            
+            if viewModel.exercises.isEmpty {
+                emptyStateView
+            } else {
+                exerciseListView
             }
-            .navigationTitle("Hızlı Başlangıç")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                toolbarContent
+            
+            finishButton
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.setupExercises([])
+        }
+        .sheet(isPresented: $showingExerciseSelector) { exerciseSelectorSheet }
+        .sheet(isPresented: $showingSaveTemplateSheet) { saveTemplateSheet }
+        .alert("Antrenmanı Bitir", isPresented: $showingFinishAlert) {
+            Button("Çıkış", role: .cancel) { 
+                dismiss()
             }
-            .sheet(isPresented: $showingExerciseSelector) {
-                ExerciseSelectorView(selectedExercises: $viewModel.selectedExercises)
-            }
-            .overlay {
-                if viewModel.isLoading {
-                    ProgressView()
+            Button("Kaydet") {
+                Task {
+                    await viewModel.saveWorkout()
+                    dismiss()
                 }
             }
         }
     }
     
-    private var exercisesSection: some View {
-        Section(header: Text("Seçilen Egzersizler")) {
-            if viewModel.selectedExercises.isEmpty {
-                Text("Henüz egzersiz seçilmedi")
-                    .foregroundColor(.secondary)
-            } else {
-                ForEach(viewModel.selectedExercises) { exercise in
-                    ExerciseConfigurationRow(
-                        exercise: exercise,
-                        onDelete: { viewModel.removeExercise(exercise) }
-                    )
-                }
-            }
+    // MARK: - View Components
+    private var workoutHeaderView: some View {
+        HStack {
+            Text(formatTime(viewModel.elapsedTime))
+                .font(.title2)
+                .monospacedDigit()
+            
+            TextField("Antrenman Adı", text: $viewModel.workoutName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+        }
+        .padding()
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "dumbbell.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.secondary)
+            
+            Text("Egzersiz ekleyerek başlayın")
+                .font(.headline)
+                .foregroundColor(.secondary)
             
             Button {
                 showingExerciseSelector = true
             } label: {
-                Label("Egzersiz Ekle", systemImage: "plus.circle")
+                Text("Egzersiz Ekle")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(AppTheme.primaryColor)
+                    .cornerRadius(10)
             }
         }
+        .padding()
     }
     
-    private var notesSection: some View {
-        Section(header: Text("Antrenman Notları")) {
-            TextEditor(text: $workoutNotes)
-                .frame(height: 100)
-        }
-    }
-    
-    private var errorSection: some View {
-        Group {
-            if !viewModel.errorMessage.isEmpty {
-                Section {
-                    Text(viewModel.errorMessage)
-                        .foregroundColor(.red)
+    private var exerciseListView: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                ForEach($viewModel.exercises) { $exercise in
+                    ActiveExerciseSetupCard(
+                        exercise: $exercise,
+                        onDelete: {
+                            withAnimation {
+                                viewModel.removeExercise(exercise)
+                            }
+                        }
+                    )
                 }
+                addExerciseButton
             }
+            .padding(.vertical)
+        }
+    }
+    
+    private var addExerciseButton: some View {
+        Button {
+            showingExerciseSelector = true
+        } label: {
+            HStack {
+                Image(systemName: "plus.circle.fill")
+                Text("Egzersiz Ekle")
+            }
+            .foregroundColor(AppTheme.primaryColor)
+            .padding()
         }
     }
     
     private var toolbarContent: some ToolbarContent {
         Group {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("İptal") {
-                    dismiss()
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button("Başla") {
-                    startWorkout()
-                }
-                .disabled(viewModel.selectedExercises.isEmpty || viewModel.isLoading)
+                Button("İptal") { dismiss() }
             }
         }
     }
     
-    //MARK: burası düzenlenecek.
-    private func startWorkout() {
-        Task {
-            await viewModel.startWorkout(notes: workoutNotes)
-            dismiss()
+    private var exerciseSelectorSheet: some View {
+        NavigationView {
+            ExerciseSelectorView { exercise in
+                let activeExercise = exercise.toActiveWorkoutExercise()
+                viewModel.exercises.append(activeExercise)
+            }
         }
+    }
+    
+    private var saveTemplateSheet: some View {
+        NavigationView {
+            SaveTemplateView(
+                exercises: viewModel.exercises.map { $0.toTemplateExercise() },
+                onSave: { name, groupId in
+                    Task {
+                        await saveAsTemplate(name: name, groupId: groupId)
+                        dismiss()
+                    }
+                }
+            )
+        }
+    }
+    
+    private var finishButton: some View {
+        Button {
+            showingFinishAlert = true
+        } label: {
+            HStack {
+                Text("Antrenmanı Bitir")
+                    .fontWeight(.semibold)
+                Image(systemName: "checkmark.circle.fill")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+        .padding()
+        .disabled(viewModel.exercises.isEmpty)
+    }
+    
+    // MARK: - Helper Methods
+    private func formatTime(_ timeInterval: TimeInterval) -> String {
+        let hours = Int(timeInterval) / 3600
+        let minutes = Int(timeInterval) / 60 % 60
+        let seconds = Int(timeInterval) % 60
+        
+        if hours > 0 {
+            return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, seconds)
+        }
+    }
+    
+    private func saveAsTemplate(name: String, groupId: String) async {
+        let templateExercises = viewModel.exercises.map { $0.toTemplateExercise() }
+        // Template kaydetme işlemleri burada yapılacak
+        // CreateTemplateViewModel'deki saveTemplate metodunu örnek alabilirsiniz
     }
 }
-
-// MARK: - Supporting Views
-struct ExerciseConfigurationRow: View {
-    let exercise: TemplateExercise
-    let onDelete: () -> Void
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(exercise.exerciseName)
-                    .font(.headline)
-                Spacer()
-                Button(action: onDelete) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                }
-            }
-            
-            exerciseDetails
-        }
-        .padding(.vertical, 4)
-    }
-    
-    private var exerciseDetails: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Label("\(exercise.sets) set", systemImage: "number.square")
-                Spacer()
-                Label("\(exercise.reps) tekrar", systemImage: "repeat")
-                if let weight = exercise.weight {
-                    Spacer()
-                    Label("\(Int(weight)) kg", systemImage: "scalemass")
-                }
-            }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-            
-            if let notes = exercise.notes {
-                Text(notes)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-} 
 
 #Preview {
     QuickStartWorkoutView()

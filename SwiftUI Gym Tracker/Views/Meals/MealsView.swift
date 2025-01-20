@@ -44,15 +44,6 @@ struct MealsView: View {
                 }
             }
             .navigationTitle("Öğünlerim")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        // Yeni öğün ekleme
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
         }
         .onChange(of: selectedDate) { _ in
             Task {

@@ -21,10 +21,9 @@ public struct ExerciseRow: View {
                 Label("\(exercise.sets) set", systemImage: "number.square")
                 Spacer()
                 Label("\(exercise.reps) tekrar", systemImage: "repeat")
-                if let weight = exercise.weight {
                     Spacer()
-                    Label("\(Int(weight)) kg", systemImage: "scalemass")
-                }
+                Label("\(Int(exercise.weight)) kg", systemImage: "scalemass")
+                
             }
             .font(.subheadline)
             .foregroundColor(.secondary)
@@ -107,7 +106,7 @@ private struct ExerciseConfigSheet: View {
                         var updatedExercise = exercise
                         updatedExercise.sets = sets
                         updatedExercise.reps = reps
-                        updatedExercise.weight = weight
+                        updatedExercise.weight = weight!
                         onSave(updatedExercise)
                         dismiss()
                     }

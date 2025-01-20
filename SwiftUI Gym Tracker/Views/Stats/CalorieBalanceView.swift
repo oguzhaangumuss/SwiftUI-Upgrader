@@ -108,3 +108,6 @@ struct CalorieBalanceView_Previews: PreviewProvider {
         CalorieBalanceView()
     }
 }
+#Preview {
+    CalorieBalanceView()
+}

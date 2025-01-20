@@ -3,32 +3,43 @@ import FirebaseFirestore
 
 class CreateTemplateViewModel: ObservableObject {
     @Published var selectedExercises: [TemplateExercise] = []
+    @Published var templateName: String = ""
     @Published var previousBests: [String: PreviousBest] = [:]
     @Published var isLoading = false
     @Published var groups: [WorkoutTemplateGroup] = []
+    @Published var selectedGroupId: String = ""
+    @Published var isGroupSelectionLocked: Bool = false
     
     private let db = FirebaseManager.shared.firestore
     
-    init() {
+    init(groupId: String? = nil) {
+        if let groupId = groupId {
+            self.selectedGroupId = groupId
+            self.isGroupSelectionLocked = true
+        }
+        
         Task {
             await fetchGroups()
         }
     }
     
     @MainActor
-    private func fetchGroups() async {
+    func fetchGroups() async {
         guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
         
         do {
-            let snapshot = try await db.collection("templateGroups")
+            let snapshot = try await FirebaseManager.shared.firestore
+                .collection("templateGroups")
                 .whereField("userId", isEqualTo: userId)
-                .order(by: "createdAt", descending: false)
                 .getDocuments()
             
-            groups = snapshot.documents.compactMap { try? $0.data(as: WorkoutTemplateGroup.self) }
-            print("📁 Yüklenen gruplar: \(groups.map { "\($0.name) (\($0.id ?? ""))" }.joined(separator: ", "))")
+            self.groups = snapshot.documents.compactMap { document -> WorkoutTemplateGroup? in
+                var group = try? document.data(as: WorkoutTemplateGroup.self)
+                group?.id = document.documentID
+                return group
+            }
         } catch {
-            print("❌ Gruplar yüklenemedi: \(error)")
+            print("Error fetching groups: \(error)")
         }
     }
     
@@ -44,39 +55,29 @@ class CreateTemplateViewModel: ObservableObject {
     }
     
     @MainActor
-    func saveTemplate(name: String, notes: String, groupId: String) async throws {
+    func saveTemplate(name: String) async throws {
         guard let userId = FirebaseManager.shared.auth.currentUser?.uid else {
-            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Kullanıcı girişi yapılmamış"])
+            throw NSError(domain: "", code: -1, 
+                        userInfo: [NSLocalizedDescriptionKey: "Kullanıcı girişi yapılmamış"])
+        }
+        
+        guard !selectedGroupId.isEmpty else {
+            throw NSError(domain: "", code: -2, 
+                        userInfo: [NSLocalizedDescriptionKey: "Lütfen bir grup seçin"])
         }
         
         let templateData: [String: Any] = [
             "name": name,
-            "notes": notes,
-            "exercises": selectedExercises.map { exercise in
-                [
-                    "id": exercise.id,
-                    "exerciseId": exercise.exerciseId,
-                    "exerciseName": exercise.exerciseName,
-                    "sets": exercise.sets,
-                    "reps": exercise.reps,
-                    "weight": exercise.weight as Any,
-                    "notes": exercise.notes as Any
-                ]
-            },
+            "exercises": selectedExercises.map { $0.toDictionary() },
             "createdBy": userId,
             "userId": userId,
-            "groupId": groupId,
+            "groupId": selectedGroupId,
             "createdAt": Timestamp(),
             "updatedAt": Timestamp()
         ]
         
-        print("💾 Şablon kaydediliyor...")
-        print("📝 Template Data: \(templateData)")
-        
         try await db.collection("workoutTemplates")
             .addDocument(data: templateData)
-        
-        print("✅ Şablon başarıyla kaydedildi")
     }
     
     func getPreviousBest(for exerciseId: String) async -> PreviousBest? {
@@ -103,5 +104,27 @@ class CreateTemplateViewModel: ObservableObject {
         }
         
         return nil
+    }
+    
+    func removeExercise(_ exercise: TemplateExercise) {
+        if let index = selectedExercises.firstIndex(where: { $0.id == exercise.id }) {
+            selectedExercises.remove(at: index)
+        }
+    }
+    
+    func addExercise(_ exercise: Exercise) {
+        let newExercise = TemplateExercise(
+            id: UUID().uuidString,
+            exerciseId: exercise.id ?? "",
+            exerciseName: exercise.name,
+            sets: 1,
+            reps: 0,
+            weight: 0
+        )
+        selectedExercises.append(newExercise)
+    }
+    
+    var selectedGroupName: String {
+        groups.first(where: { $0.id == selectedGroupId })?.name ?? "Seçilmedi"
     }
 } 

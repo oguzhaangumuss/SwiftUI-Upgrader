@@ -2,6 +2,7 @@ import FirebaseFirestore
 
 struct WorkoutHistory: Identifiable, Codable {
     let id: String
+    let userId: String
     let templateId: String?
     let templateName: String
     let date: Timestamp
@@ -21,4 +22,27 @@ struct WorkoutHistory: Identifiable, Codable {
             "\(Int(weight)) kg x \(sets)"
         }
     }
-} 
+}
+extension WorkoutHistory {
+    func toDictionary() -> [String: Any] {
+        return [
+            "id": id,
+            "userId": userId,
+            "templateId": templateId as Any,
+            "templateName": templateName,
+            "date": date,
+            "duration": duration,
+            "totalWeight": totalWeight,
+            "caloriesBurned": caloriesBurned,
+            "exercises": exercises.map { exercise in
+                [
+                    "id": exercise.id,
+                    "exerciseId": exercise.exerciseId,
+                    "exerciseName": exercise.exerciseName,
+                    "sets": exercise.sets,
+                    "weight": exercise.weight
+                ]
+            }
+        ]
+    }
+}

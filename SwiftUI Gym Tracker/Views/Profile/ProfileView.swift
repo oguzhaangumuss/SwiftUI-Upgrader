@@ -3,6 +3,7 @@ import Charts
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @StateObject private var goalsViewModel = GoalsViewModel()
     @State private var showingSettings = false
     
     var body: some View {
@@ -35,9 +36,24 @@ struct ProfileView: View {
                 }
                 .padding(.horizontal)
                 
-                // 4. Ana Menü Butonları
-                NavigationButtonsView()
-                    .padding(.horizontal)
+                // 4. Hedefler Özeti
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Hedeflerim")
+                            .font(.headline)
+                        
+                        Spacer()
+                        
+                        NavigationLink("Tümü") {
+                            GoalsView()
+                        }
+                        .font(.subheadline)
+                    }
+                    
+                    // Hedefler özet kartı
+                    GoalsSummaryView(viewModel: goalsViewModel)
+                }
+                .padding(.horizontal)
             }
             .padding(.vertical)
         }
@@ -58,12 +74,70 @@ struct ProfileView: View {
             Task {
                 await viewModel.fetchUserData()
                 await viewModel.fetchTodaysStats()
+                await goalsViewModel.fetchWeeklyWorkoutData()
+                goalsViewModel.fetchGoals()
             }
         }
         .refreshable {
             Task {
                 await viewModel.fetchUserData()
                 await viewModel.fetchTodaysStats()
+            }
+        }
+    }
+}
+
+// Hedefler özet görünümü
+struct GoalsSummaryView: View {
+    @ObservedObject var viewModel: GoalsViewModel
+    @Environment(\.colorScheme) var colorScheme // Renk şemasını algılamak için
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Antrenman Hedefi
+            GoalProgressRow(
+                title: "Haftalık Antrenman",
+                current: Double(viewModel.workouts),
+                target: viewModel.workoutGoal ?? 0
+            )
+            
+            // Kalori Hedefi
+            GoalProgressRow(
+                title: "Yakılan Kalori",
+                current: viewModel.caloriesBurned,
+                target: viewModel.calorieGoal ?? 0
+            )
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground)) // Sistem grup arka plan rengi
+        .cornerRadius(12)
+    }
+}
+
+// Hedef ilerleme satırı
+struct GoalProgressRow: View {
+    let title: String
+    let current: Double
+    let target: Double
+    
+    var progress: Double {
+        target > 0 ? min(current / target, 1.0) : 0
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.subheadline)
+            
+            HStack {
+                Text("\(Int(current))/\(Int(target))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Spacer()
+                
+                ProgressView(value: progress)
+                    .frame(width: 100)
             }
         }
     }

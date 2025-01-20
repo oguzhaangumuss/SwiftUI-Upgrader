@@ -6,9 +6,9 @@ class ProfileViewModel: ObservableObject {
     @Published var todaysStats = DailyStats()
     
     struct DailyStats {
-        var consumedCalories: Double = 0  // Alınan kalori
-        var burnedCalories: Double = 0    // Yakılan kalori
-        var workoutCount: Int = 0         // Antrenman sayısı
+        var consumedCalories: Double = 2  // Alınan kalori
+        var burnedCalories: Double = 2    // Yakılan kalori
+        var workoutCount: Int = 2         // Antrenman sayısı
         var weightChange: Double? = nil    // Kilo değişimi
     }
     
@@ -50,7 +50,7 @@ class ProfileViewModel: ObservableObject {
         do {
             // Egzersiz verileri ve yakılan kaloriler
             let workouts = try await FirebaseManager.shared.firestore
-                .collection("userExercises")
+                .collection("workoutHistory")
                 .whereField("userId", isEqualTo: userId)
                 .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: today))
                 .whereField("date", isLessThan: Timestamp(date: tomorrow))
@@ -61,13 +61,12 @@ class ProfileViewModel: ObservableObject {
             var stats = DailyStats()
             stats.workoutCount = workouts.documents.count
             
-            let workoutDocs = workouts.documents.compactMap { try? $0.data(as: UserExercise.self) }
+            let workoutDocs = workouts.documents.compactMap { try? $0.data(as: WorkoutHistory.self) }
             print("🏋️ Dönüştürülen egzersiz sayısı: \(workoutDocs.count)")
             
             stats.burnedCalories = workoutDocs
-                .compactMap { exercise in
-                    let calories = exercise.caloriesBurned
-                    print("   - \(exercise.exerciseName ?? "Bilinmeyen"): \(calories ?? 0) kcal")
+                .compactMap { workout in
+                    let calories = workout.caloriesBurned
                     return calories
                 }
                 .reduce(0, +)

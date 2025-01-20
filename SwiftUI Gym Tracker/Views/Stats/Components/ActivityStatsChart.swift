@@ -6,7 +6,7 @@ struct ActivityStatsChart: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Aktivite Dağılımı")
+            Text("Aktivite İstatistikleri")
                 .font(.headline)
             
             if data.isEmpty {
@@ -14,42 +14,45 @@ struct ActivityStatsChart: View {
                     .foregroundColor(.secondary)
             } else {
                 VStack(spacing: 20) {
-                    // Pasta Grafik
+                    // Çubuk Grafik
                     Chart {
-                        ForEach(data) { activity in
-                            SectorMark(
-                                angle: .value("Kalori", activity.calories),
-                                innerRadius: .ratio(0.618),
-                                angularInset: 1.5
+                        ForEach(data, id: \.date) { activity in
+                            BarMark(
+                                x: .value("Tarih", activity.date, unit: .day),
+                                y: .value("Antrenman", activity.workoutCount)
                             )
-                            .cornerRadius(5)
-                            .foregroundStyle(by: .value("Aktivite", activity.name))
+                            .foregroundStyle(Color.blue.gradient)
                         }
                     }
                     .frame(height: 200)
-                    .chartLegend(position: .bottom)
-                    
-                    // Aktivite Listesi
-                    VStack(spacing: 12) {
-                        ForEach(data) { activity in
-                            HStack {
-                                Text(activity.name)
-                                    .font(.subheadline)
-                                
-                                Spacer()
-                                
-                                VStack(alignment: .trailing) {
-                                    Text("\(Int(activity.calories)) kcal")
-                                        .font(.subheadline)
-                                        .foregroundColor(.primary)
-                                    
-                                    Text(formatDuration(activity.duration))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .padding(.horizontal)
+                    .chartXAxis {
+                        AxisMarks(values: .stride(by: .day)) { value in
+                            AxisValueLabel(format: .dateTime.weekday())
                         }
+                    }
+                    
+                    // Aktivite Özeti
+                    VStack(spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Toplam Antrenman")
+                                    .font(.subheadline)
+                                Text("\(totalWorkouts)")
+                                    .font(.title2)
+                                    .bold()
+                            }
+                            
+                            Spacer()
+                            
+                            VStack(alignment: .trailing) {
+                                Text("Toplam Süre")
+                                    .font(.subheadline)
+                                Text(formatTotalDuration())
+                                    .font(.title2)
+                                    .bold()
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                 }
             }
@@ -59,9 +62,16 @@ struct ActivityStatsChart: View {
         .cornerRadius(12)
     }
     
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let hours = Int(duration) / 3600
-        let minutes = Int(duration) / 60 % 60
+    // Toplam antrenman sayısı
+    private var totalWorkouts: Int {
+        data.reduce(0) { $0 + $1.workoutCount }
+    }
+    
+    // Toplam süre
+    private func formatTotalDuration() -> String {
+        let totalDuration = data.reduce(0.0) { $0 + $1.duration }
+        let hours = Int(totalDuration) / 3600
+        let minutes = Int(totalDuration) / 60 % 60
         
         if hours > 0 {
             return "\(hours) sa \(minutes) dk"
@@ -71,23 +81,35 @@ struct ActivityStatsChart: View {
     }
 }
 
-struct ActivityStatsChart_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewData = [
-            StatsViewModel.ActivityData(
-                name: "Koşu",
-                duration: 3600,
-                calories: 400
-            ),
-            StatsViewModel.ActivityData(
-                name: "Ağırlık",
-                duration: 2700,
-                calories: 300
-            )
-        ]
-        
-        ActivityStatsChart(data: previewData)
-            .padding()
-            .previewLayout(.sizeThatFits)
-    }
+#Preview {
+    let calendar = Calendar.current
+    let today = Date()
+    
+    // Örnek veriler
+    let previewData = [
+        StatsViewModel.ActivityData(
+            date: calendar.date(byAdding: .day, value: -3, to: today)!,
+            workoutCount: 2,
+            duration: 3600
+        ),
+        StatsViewModel.ActivityData(
+            date: calendar.date(byAdding: .day, value: -2, to: today)!,
+            workoutCount: 1,
+            duration: 1800
+        ),
+        StatsViewModel.ActivityData(
+            date: calendar.date(byAdding: .day, value: -1, to: today)!,
+            workoutCount: 3,
+            duration: 5400
+        ),
+        StatsViewModel.ActivityData(
+            date: today,
+            workoutCount: 2,
+            duration: 3600
+        )
+    ]
+    
+    return ActivityStatsChart(data: previewData)
+        .padding()
+        .previewLayout(.sizeThatFits)
 } 

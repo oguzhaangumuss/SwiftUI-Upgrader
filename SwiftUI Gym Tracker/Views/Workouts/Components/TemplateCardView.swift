@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseCore
+
 struct TemplateCardView: View {
     let template: WorkoutTemplate
     let onTap: () -> Void
@@ -10,26 +12,31 @@ struct TemplateCardView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    ForEach(template.exercises.prefix(3)) { exercise in
-                        Text(exercise.exerciseName)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                    }
-                    
-                    if template.exercises.count > 3 {
-                        Text("...")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
+                if !template.exercises.isEmpty {
+                    Text("\(template.exercises.count) egzersiz")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
-            .frame(width: 160, height: 160)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(Color(.systemBackground))
-            .cornerRadius(16)
+            .cornerRadius(12)
             .shadow(radius: 2)
         }
     }
-} 
+}
+
+#Preview {
+    TemplateCardView(
+        template: WorkoutTemplate(
+            name: "Test Template", 
+            exercises: [],
+            createdBy: "Test User",
+            userId: "test-user-id",
+            createdAt: Timestamp(),
+            updatedAt: Timestamp()
+        ),
+        onTap: {}
+    )
+}

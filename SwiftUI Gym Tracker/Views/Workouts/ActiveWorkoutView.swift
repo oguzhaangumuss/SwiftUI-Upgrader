@@ -2,127 +2,129 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ActiveWorkoutView: View {
-    let exercises: [TemplateExercise]
-    @StateObject private var viewModel = ActiveWorkoutViewModel()
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var viewModel: ActiveWorkoutViewModel
     @State private var showingFinishAlert = false
+    @State private var showingExerciseSelector = false
     
-    private func finishWorkout() {
-        Task {
-            await viewModel.saveWorkout()
-            dismiss()
-        }
+    init(template: WorkoutTemplate) {
+        let viewModel = ActiveWorkoutViewModel()
+        let activeExercises = template.exercises.map { $0.toActiveWorkoutExercise() }
+        viewModel.setupExercises(activeExercises)
+        viewModel.workoutName = template.name
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(exercises) { exercise in
-                    ExerciseProgressSection(
-                        exercise: exercise,
-                        progress: viewModel.progress[exercise.id] ?? ExerciseProgress()
-                    ) { progress in
-                        viewModel.updateProgress(for: exercise.id, progress: progress)
+        VStack(spacing: 0) {
+            workoutHeaderView
+            
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach($viewModel.exercises) { $exercise in
+                        ActiveExerciseSetupCard(
+                            exercise: $exercise,
+                            onDelete: {
+                                withAnimation {
+                                    viewModel.removeExercise(exercise)
+                                }
+                            }
+                        )
                     }
+                    
+                    addExerciseButton
                 }
-                
-                Section {
-                    Button {
-                        showingFinishAlert = true
-                    } label: {
-                        Text("Antrenmanı Bitir")
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity)
-                    }
+                .padding(.vertical)
+            }
+            
+            finishButton
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingExerciseSelector) {
+            NavigationView {
+                ExerciseSelectorView { exercise in
+                    let activeExercise = exercise.toActiveWorkoutExercise()
+                    viewModel.exercises.append(activeExercise)
                 }
             }
-            .navigationTitle("Aktif Antrenman")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("İptal") {
-                        dismiss()
-                    }
-                }
+        }
+        .alert("Antrenmanı Bitir", isPresented: $showingFinishAlert) {
+            Button("Çıkış", role: .cancel) { 
+                dismiss()
             }
-            .alert("Antrenmanı Bitir", isPresented: $showingFinishAlert) {
-                Button("İptal", role: .cancel) { }
-                Button("Bitir") {
-                    finishWorkout()
+            Button("Kaydet") {
+                Task {
+                    await viewModel.saveWorkout()
+                    dismiss()
                 }
-            } message: {
-                Text("Antrenmanı bitirmek istediğinizden emin misiniz?")
-            }
-            .onAppear {
-                guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
-                
-                let template = WorkoutTemplate(
-                    name: "Aktif Antrenman",
-                    exercises: exercises,
-                    createdBy: userId,
-                    userId: userId,
-                    createdAt: Timestamp(),
-                    updatedAt: Timestamp()
-                )
-                viewModel.fetchWorkoutTemplates(for: template)
             }
         }
     }
     
-    struct ExerciseProgressSection: View {
-        let exercise: TemplateExercise
-        let progress: ExerciseProgress
-        let onProgressUpdate: (ExerciseProgress) -> Void
-        
-        var body: some View {
-            Section(header: Text(exercise.exerciseName)) {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Label("\(exercise.sets) set", systemImage: "number.square")
-                        Spacer()
-                        Label("\(exercise.reps) tekrar", systemImage: "repeat")
-                        if let weight = exercise.weight {
-                            Spacer()
-                            Label("\(Int(weight)) kg", systemImage: "scalemass")
-                        }
-                    }
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    
-                    LazyVGrid(columns: Array(repeating: .init(.flexible()), count: 5), spacing: 8) {
-                        ForEach(0..<exercise.sets, id: \.self) { setIndex in
-                            let isCompleted = progress.completedSets.indices.contains(setIndex)
-                            Button {
-                                var updatedProgress = progress
-                                if isCompleted {
-                                    updatedProgress.completedSets.remove(at: setIndex)
-                                } else {
-                                    let set = ExerciseSet(
-                                        reps: exercise.reps,
-                                        weight: exercise.weight ?? 0,
-                                        isCompleted: true
-                                    )
-                                    if setIndex >= updatedProgress.completedSets.count {
-                                        updatedProgress.completedSets.append(set)
-                                    } else {
-                                        updatedProgress.completedSets.insert(set, at: setIndex)
-                                    }
-                                }
-                                onProgressUpdate(updatedProgress)
-                            } label: {
-                                Circle()
-                                    .fill(isCompleted ? AppTheme.primaryColor : Color(.systemGray5))
-                                    .frame(width: 44, height: 44)
-                                    .overlay(
-                                        Text("\(setIndex + 1)")
-                                            .foregroundColor(isCompleted ? .white : .primary)
-                                    )
-                            }
-                        }
-                    }
+    private var workoutHeaderView: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 4) {
+                Text(formatTime(viewModel.elapsedTime))
+                    .font(.title)
+                    .monospacedDigit()
+                
+                Button {
+                    viewModel.resetTimer()
+                } label: {
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.blue)
                 }
-                .padding(.vertical, 8)
+                
+                
             }
+            
+            TextField("Antrenman Adı", text: $viewModel.workoutName)
+                .font(.title2)
+                .multilineTextAlignment(.leading)
+                .textFieldStyle(.roundedBorder)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .shadow(radius: 2)
+    }
+    
+    private var finishButton: some View {
+        Button {
+            showingFinishAlert = true
+        } label: {
+            HStack {
+                Text("Antrenmanı Bitir")
+                    .fontWeight(.semibold)
+                Image(systemName: "checkmark.circle.fill")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+        .padding()
+    }
+    
+    private var addExerciseButton: some View {
+        Button {
+            showingExerciseSelector = true
+        } label: {
+            HStack {
+                Image(systemName: "plus.circle.fill")
+                Text("Egzersiz Ekle")
+            }
+            .foregroundColor(AppTheme.primaryColor)
+            .padding()
         }
     }
+    
+    private func formatTime(_ timeInterval: TimeInterval) -> String {
+        let minutes = Int(timeInterval) / 60
+        let seconds = Int(timeInterval) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
 }
+
+

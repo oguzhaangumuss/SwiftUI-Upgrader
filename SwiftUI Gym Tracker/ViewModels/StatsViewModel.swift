@@ -2,268 +2,212 @@ import SwiftUI
 import FirebaseFirestore
 
 class StatsViewModel: ObservableObject {
+    // MARK: - Veri Modelleri
+    struct CustomRangeData: Identifiable {
+        let id = UUID()
+        let date: Date
+        var calories: Double
+        var workouts: Int
+        var weight: Double?
+    }
+    
+    struct ActivityData: Identifiable {
+        let id = UUID()
+        let date: Date
+        var workoutCount: Int
+        var duration: TimeInterval
+    }
+    
+    struct CalorieData: Identifiable {
+        let id = UUID()
+        let date: Date
+        var burned: Double
+        var consumed: Double
+    }
+    
+    struct WeightData: Identifiable {
+        let id = UUID()
+        let date: Date
+        var weight: Double
+    }
+    
+    // MARK: - Published Properties
     @Published var activityData: [ActivityData] = []
     @Published var calorieData: [CalorieData] = []
     @Published var weightData: [WeightData] = []
     @Published var customRangeData: [CustomRangeData] = []
     @Published var isLoading = false
     
-    // Veri modelleri
-    struct ActivityData: Identifiable {
-        let id = UUID()
-        let name: String
-        let duration: TimeInterval
-        let calories: Double
-    }
-    
-    struct CalorieData: Identifiable {
-        let id = UUID()
-        let date: Date
-        let consumed: Double
-        let burned: Double
-    }
-    
-    struct WeightData: Identifiable {
-        let id = UUID()
-        let date: Date
-        let weight: Double
-    }
-    
-    struct CustomRangeData: Identifiable {
-        let id = UUID()
-        let date: Date
-        let value: Double
-        let type: String
-    }
-    
-    struct WorkoutCount: Identifiable {
-        let id = UUID()
-        let date: Date
-        let count: Int
-    }
-    
-    func fetchStats(for period: StatsPeriod) async {
-        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
-        
-        await MainActor.run { isLoading = true }
-        
-        let (startDate, endDate) = calculateDateRange(for: period)
-        
-        do {
-            // Aktivite dağılımı
-            let activities = try await fetchActivityData(userId: userId, start: startDate, end: endDate)
+    // MARK: - Yardımcı Fonksiyonlar
+    private func fetchWorkouts(userId: String, start: Date, end: Date) async throws -> [ActivityData] {
+        let snapshot = try await FirebaseManager.shared.firestore
+            .collection("workoutHistory")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField("date", isLessThan: Timestamp(date: end))
+            .getDocuments()
             
-            // Kalori verileri
-            let calories = try await fetchCalorieData(userId: userId, start: startDate, end: endDate)
-            
-            // Kilo takibi
-            let weights = try await fetchWeightData(userId: userId, start: startDate, end: endDate)
-            
-            await MainActor.run {
-                self.activityData = activities
-                self.calorieData = calories
-                self.weightData = weights
-                self.isLoading = false
-            }
-        } catch {
-            print("❌ İstatistik verileri alınamadı: \(error)")
-            await MainActor.run { isLoading = false }
+        return snapshot.documents.compactMap { document in
+            guard let workout = try? document.data(as: WorkoutHistory.self) else { return nil }
+            return ActivityData(
+                date: workout.date.dateValue(),
+                workoutCount: 1,
+                duration: workout.duration ?? 0
+            )
         }
     }
     
-    private func calculateDateRange(for period: StatsPeriod) -> (Date, Date) {
+    private func fetchCalories(userId: String, start: Date, end: Date) async throws -> [CalorieData] {
+        let workouts = try await FirebaseManager.shared.firestore
+            .collection("workoutHistory")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField("date", isLessThan: Timestamp(date: end))
+            .getDocuments()
+            
+        var caloriesByDate: [Date: CalorieData] = [:]
+        
+        // Yakılan kalorileri hesapla
+        for document in workouts.documents {
+            if let workout = try? document.data(as: WorkoutHistory.self) {
+                let date = Calendar.current.startOfDay(for: workout.date.dateValue())
+                let burned = workout.caloriesBurned ?? 0
+                
+                if var existing = caloriesByDate[date] {
+                    existing.burned += burned
+                    caloriesByDate[date] = existing
+                } else {
+                    caloriesByDate[date] = CalorieData(date: date, burned: burned, consumed: 0)
+                }
+            }
+        }
+        
+        // Alınan kalorileri hesapla
+        let meals = try await FirebaseManager.shared.firestore
+            .collection("userMeals")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
+            .whereField("date", isLessThan: Timestamp(date: end))
+            .getDocuments()
+            
+        for document in meals.documents {
+            if let meal = try? document.data(as: UserMeal.self) {
+                let date = Calendar.current.startOfDay(for: meal.date.dateValue())
+                let consumed = meal.totalCalories ?? 0
+                
+                if var existing = caloriesByDate[date] {
+                    existing.consumed += consumed
+                    caloriesByDate[date] = existing
+                } else {
+                    caloriesByDate[date] = CalorieData(date: date, burned: 0, consumed: consumed)
+                }
+            }
+        }
+        
+        return Array(caloriesByDate.values)
+    }
+    
+    private func calculateDateRange(for period: StatsPeriod) -> (start: Date, end: Date) {
         let calendar = Calendar.current
         let now = Date()
-        let endDate = calendar.startOfDay(for: now)
         
-        let startDate: Date
         switch period {
         case .daily:
-            startDate = calendar.date(byAdding: .day, value: -1, to: endDate)!
+            let startOfDay = calendar.startOfDay(for: now)
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+            return (startOfDay, endOfDay)
+            
         case .weekly:
-            startDate = calendar.date(byAdding: .day, value: -7, to: endDate)!
+            // Haftanın başlangıcını al (Pazartesi)
+            let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
+            let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart)!
+            return (weekStart, weekEnd)
+            
         case .monthly:
-            startDate = calendar.date(byAdding: .month, value: -1, to: endDate)!
+            let components = calendar.dateComponents([.year, .month], from: now)
+            let startOfMonth = calendar.date(from: components)!
+            let nextMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
+            return (startOfMonth, nextMonth)
         }
-        
-        return (startDate, endDate)
     }
     
-    // Firebase sorguları...
-    private func fetchActivityData(userId: String, start: Date, end: Date) async throws -> [ActivityData] {
-        let snapshot = try await FirebaseManager.shared.firestore
-            .collection("userExercises")
-            .whereField("userId", isEqualTo: userId)
-            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("date", isLessThan: Timestamp(date: end))
-            .getDocuments()
+    // Özel tarih aralığı için veri çekme fonksiyonu
+    private func fetchCustomRangeData(userId: String, start: Date, end: Date) async throws -> [CustomRangeData] {
+        // Antrenman verileri
+        let workouts = try await fetchWorkouts(userId: userId, start: start, end: end)
         
-        var activityStats: [String: (duration: TimeInterval, calories: Double)] = [:]
+        // Kalori verileri
+        let calories = try await fetchCalories(userId: userId, start: start, end: end)
         
-        for document in snapshot.documents {
-            if let exercise = try? document.data(as: UserExercise.self) {
-                let name = exercise.exerciseName ?? "Diğer"
-                let duration = exercise.duration
-                let calories = exercise.caloriesBurned ?? 0
-                
-                let current = activityStats[name] ?? (0, 0)
-                activityStats[name] = (
-                    duration: current.duration + duration,
-                    calories: current.calories + calories
+        // Verileri birleştir
+        var customData: [Date: CustomRangeData] = [:]
+        
+        // Antrenman verilerini ekle
+        for workout in workouts {
+            let date = Calendar.current.startOfDay(for: workout.date)
+            if var existing = customData[date] {
+                existing.workouts += workout.workoutCount
+                customData[date] = existing
+            } else {
+                customData[date] = CustomRangeData(
+                    date: date,
+                    calories: 0,
+                    workouts: workout.workoutCount,
+                    weight: nil
                 )
             }
         }
         
-        return activityStats.map { name, stats in
-            ActivityData(
-                name: name,
-                duration: stats.duration,
-                calories: stats.calories
-            )
-        }.sorted { $0.calories > $1.calories }
-    }
-    
-    private func fetchCalorieData(userId: String, start: Date, end: Date) async throws -> [CalorieData] {
-        var dailyData: [Date: (consumed: Double, burned: Double)] = [:]
-        let calendar = Calendar.current
-        
-        // Yakılan kaloriler
-        let workouts = try await FirebaseManager.shared.firestore
-            .collection("userExercises")
-            .whereField("userId", isEqualTo: userId)
-            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("date", isLessThan: Timestamp(date: end))
-            .getDocuments()
-        
-        for document in workouts.documents {
-            if let exercise = try? document.data(as: UserExercise.self) {
-                let date = calendar.startOfDay(for: exercise.date.dateValue())
-                let current = dailyData[date] ?? (0, 0)
-                dailyData[date] = (
-                    consumed: current.consumed,
-                    burned: current.burned + (exercise.caloriesBurned ?? 0)
+        // Kalori verilerini ekle
+        for calorie in calories {
+            let date = Calendar.current.startOfDay(for: calorie.date)
+            if var existing = customData[date] {
+                existing.calories = calorie.burned - calorie.consumed
+                customData[date] = existing
+            } else {
+                customData[date] = CustomRangeData(
+                    date: date,
+                    calories: calorie.burned - calorie.consumed,
+                    workouts: 0,
+                    weight: nil
                 )
             }
         }
         
-        // Alınan kaloriler
-        let meals = try await FirebaseManager.shared.firestore
-            .collection("meals")
-            .whereField("userId", isEqualTo: userId)
-            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("date", isLessThan: Timestamp(date: end))
-            .getDocuments()
-        
-        for document in meals.documents {
-            if let meal = try? document.data(as: Meal.self) {
-                let date = calendar.startOfDay(for: meal.date.dateValue())
-                let current = dailyData[date] ?? (0, 0)
-                dailyData[date] = (
-                    consumed: current.consumed + meal.totalCalories,
-                    burned: current.burned
-                )
-            }
-        }
-        
-        return dailyData.map { date, stats in
-            CalorieData(
-                date: date,
-                consumed: stats.consumed,
-                burned: stats.burned
-            )
-        }.sorted { $0.date < $1.date }
+        return Array(customData.values).sorted(by: { $0.date < $1.date })
     }
     
-    private func fetchWeightData(userId: String, start: Date, end: Date) async throws -> [WeightData] {
-        let snapshot = try await FirebaseManager.shared.firestore
-            .collection("users")
-            .document(userId)
-            .getDocument()
-        
-        guard let user = try? snapshot.data(as: User.self),
-              let notes = user.progressNotes else {
-            return []
+    // MARK: - Ana Fonksiyon
+    @MainActor
+    func fetchStats(for period: StatsPeriod) async {
+        isLoading = true
+        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else {
+            print("❌ Kullanıcı ID'si bulunamadı")
+            isLoading = false
+            return
         }
         
-        return notes
-            .filter { note in
-                let date = note.date.dateValue()
-                return date >= start && date <= end
-            }
-            .map { note in
-                WeightData(
-                    date: note.date.dateValue(),
-                    weight: note.weight
-                )
-            }
-            .sorted { $0.date < $1.date }
-    }
-    
-    private func fetchWorkoutCount(userId: String, start: Date, end: Date) async throws -> [WorkoutCount] {
-        let snapshot = try await FirebaseManager.shared.firestore
-            .collection("userExercises")
-            .whereField("userId", isEqualTo: userId)
-            .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
-            .whereField("date", isLessThan: Timestamp(date: end))
-            .getDocuments()
-        
-        var dailyCount: [Date: Int] = [:]
-        let calendar = Calendar.current
-        
-        // Her gün için antrenman sayısını hesapla
-        for document in snapshot.documents {
-            if let exercise = try? document.data(as: UserExercise.self) {
-                let date = calendar.startOfDay(for: exercise.date.dateValue())
-                dailyCount[date, default: 0] += 1
-            }
-        }
-        
-        // Tarihe göre sıralı dizi oluştur
-        return dailyCount.map { date, count in
-            WorkoutCount(date: date, count: count)
-        }.sorted { $0.date < $1.date }
-    }
-    
-    func fetchCustomRangeData(start: Date, end: Date, metrics: Set<CustomDateRangeChart.CustomMetric>) async {
-        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else { return }
-        
-        await MainActor.run { isLoading = true }
+        let (startDate, endDate) = calculateDateRange(for: period)
+        print("\n📊 İstatistik Verileri Çekiliyor:")
+        print("📅 Periyot: \(period)")
+        print("📅 Başlangıç: \(startDate)")
+        print("📅 Bitiş: \(endDate)")
         
         do {
-            var rangeData: [CustomRangeData] = []
-            
-            // Kalori verilerini getir
-            if metrics.contains(.calories) {
-                let calorieStats = try await fetchCalorieData(userId: userId, start: start, end: end)
-                rangeData += calorieStats.flatMap { stat in [
-                    CustomRangeData(date: stat.date, value: stat.consumed, type: "Alınan Kalori"),
-                    CustomRangeData(date: stat.date, value: stat.burned, type: "Yakılan Kalori")
-                ]}
-            }
-            
-            // Antrenman verilerini getir
-            if metrics.contains(.workouts) {
-                let workoutStats = try await fetchWorkoutCount(userId: userId, start: start, end: end)
-                rangeData += workoutStats.map { stat in
-                    CustomRangeData(date: stat.date, value: Double(stat.count), type: "Antrenman")
-                }
-            }
-            
-            // Kilo verilerini getir
-            if metrics.contains(.weight) {
-                let weightStats = try await fetchWeightData(userId: userId, start: start, end: end)
-                rangeData += weightStats.map { stat in
-                    CustomRangeData(date: stat.date, value: stat.weight, type: "Kilo")
-                }
-            }
+            let workouts = try await fetchWorkouts(userId: userId, start: startDate, end: endDate)
+            let calories = try await fetchCalories(userId: userId, start: startDate, end: endDate)
+            let customRange = try await fetchCustomRangeData(userId: userId, start: startDate, end: endDate)
             
             await MainActor.run {
-                self.customRangeData = rangeData
+                self.activityData = workouts
+                self.calorieData = calories
+                self.customRangeData = customRange
                 self.isLoading = false
             }
+            
         } catch {
-            print("❌ Özel aralık verileri alınamadı: \(error)")
-            await MainActor.run { isLoading = false }
+            print("❌ Veri çekme hatası: \(error)")
+            isLoading = false
         }
     }
 }
@@ -271,3 +215,4 @@ class StatsViewModel: ObservableObject {
 enum StatsPeriod {
     case daily, weekly, monthly
 } 
+

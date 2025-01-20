@@ -16,12 +16,9 @@ struct CustomDateRangeChart: View {
         
         var unit: String {
             switch self {
-            case .calories:
-                return "kcal"
-            case .workouts:
-                return "adet"
-            case .weight:
-                return "kg"
+            case .calories: return "kcal"
+            case .workouts: return "adet"
+            case .weight: return "kg"
             }
         }
     }
@@ -47,14 +44,17 @@ struct CustomDateRangeChart: View {
                 Text("Metrikler")
                     .font(.headline)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(CustomMetric.allCases, id: \.self) { metric in
-                            Toggle(metric.rawValue, isOn: binding(for: metric))
-                                .toggleStyle(.button)
-                                .buttonStyle(.bordered)
+                ForEach(CustomMetric.allCases) { metric in
+                    Toggle(metric.rawValue, isOn: Binding(
+                        get: { selectedMetrics.contains(metric) },
+                        set: { isSelected in
+                            if isSelected {
+                                selectedMetrics.insert(metric)
+                            } else {
+                                selectedMetrics.remove(metric)
+                            }
                         }
-                    }
+                    ))
                 }
             }
             
@@ -63,12 +63,33 @@ struct CustomDateRangeChart: View {
                 Text("Veri bulunamadı")
                     .foregroundColor(.secondary)
             } else {
-                Chart(data) { item in
-                    LineMark(
-                        x: .value("Tarih", item.date),
-                        y: .value("Değer", item.value)
-                    )
-                    .foregroundStyle(by: .value("Tür", item.type))
+                Chart {
+                    ForEach(data) { item in
+                        if selectedMetrics.contains(.calories) {
+                            LineMark(
+                                x: .value("Tarih", item.date),
+                                y: .value("Kalori", item.calories)
+                            )
+                            .foregroundStyle(.orange)
+                        }
+                        
+                        if selectedMetrics.contains(.workouts) {
+                            LineMark(
+                                x: .value("Tarih", item.date),
+                                y: .value("Antrenman", Double(item.workouts))
+                            )
+                            .foregroundStyle(.blue)
+                        }
+                        
+                        if selectedMetrics.contains(.weight),
+                           let weight = item.weight {
+                            LineMark(
+                                x: .value("Tarih", item.date),
+                                y: .value("Kilo", weight)
+                            )
+                            .foregroundStyle(.green)
+                        }
+                    }
                 }
                 .frame(height: 200)
                 .chartYAxis {
@@ -81,21 +102,34 @@ struct CustomDateRangeChart: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
     }
-    
-    private func binding(for metric: CustomMetric) -> Binding<Bool> {
-        Binding(
-            get: { selectedMetrics.contains(metric) },
-            set: { isSelected in
-                if isSelected {
-                    selectedMetrics.insert(metric)
-                } else {
-                    selectedMetrics.remove(metric)
-                }
-            }
-        )
-    }
 }
 
 #Preview {
-    CustomDateRangeChart(data: [])
+    let calendar = Calendar.current
+    let today = Date()
+    
+    let previewData = [
+        StatsViewModel.CustomRangeData(
+            date: calendar.date(byAdding: .day, value: -3, to: today)!,
+            calories: 500,
+            workouts: 2,
+            weight: 75.5
+        ),
+        StatsViewModel.CustomRangeData(
+            date: calendar.date(byAdding: .day, value: -2, to: today)!,
+            calories: 600,
+            workouts: 1,
+            weight: 75.3
+        ),
+        StatsViewModel.CustomRangeData(
+            date: calendar.date(byAdding: .day, value: -1, to: today)!,
+            calories: 450,
+            workouts: 3,
+            weight: 75.2
+        )
+    ]
+    
+    return CustomDateRangeChart(data: previewData)
+        .padding()
+        .previewLayout(.sizeThatFits)
 } 

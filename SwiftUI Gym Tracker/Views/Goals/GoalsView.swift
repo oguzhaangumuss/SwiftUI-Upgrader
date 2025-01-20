@@ -10,7 +10,7 @@ struct GoalsView: View {
                 // Kalori Hedefi
                 GoalSection(
                     title: "Kalori Hedefi",
-                    current: viewModel.currentCalories,
+                    current: viewModel.caloriesBurned,
                     target: viewModel.calorieGoal,
                     onEdit: { viewModel.editCalorieGoal() }
                 )
@@ -18,7 +18,7 @@ struct GoalsView: View {
                 // Antrenman Hedefi
                 GoalSection(
                     title: "Haftalık Antrenman",
-                    current: viewModel.currentWorkouts,
+                    current: Double(viewModel.workouts),
                     target: viewModel.workoutGoal,
                     onEdit: { viewModel.editWorkoutGoal() }
                 )
@@ -26,7 +26,7 @@ struct GoalsView: View {
                 // Kilo Hedefi
                 GoalSection(
                     title: "Kilo Hedefi",
-                    current: viewModel.currentWeight,
+                    current: viewModel.weight,
                     target: viewModel.weightGoal,
                     onEdit: { viewModel.editWeightGoal() }
                 )
@@ -41,8 +41,11 @@ struct GoalsView: View {
             }
         }
         .navigationTitle("Hedeflerim")
-        .refreshable {
-            viewModel.fetchGoals()
+        .onAppear {
+            Task{
+                await viewModel.fetchWeeklyWorkoutData()
+                viewModel.fetchGoals()
+            }
         }
     }
 } 

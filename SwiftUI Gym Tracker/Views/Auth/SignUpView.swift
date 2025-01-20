@@ -186,9 +186,9 @@ struct SignUpView: View {
             "createdAt": Timestamp(),
             "updatedAt": Timestamp(),
             "joinDate": Timestamp(),
-            "calorieGoal": NSNull(),
-            "workoutGoal": NSNull(),
-            "weightGoal": NSNull(),
+            "calorieGoal": 1,
+            "workoutGoal": 1,
+            "weightGoal": 1,
             "personalBests": [:] as [String: Double],
             "progressNotes": [] as [[String: Any]]
         ]

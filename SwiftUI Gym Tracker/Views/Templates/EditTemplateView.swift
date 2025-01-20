@@ -110,3 +110,4 @@ struct TemplateExerciseRowView: View {
         .padding(.vertical, 4)
     }
 } 
+

@@ -96,3 +96,4 @@ private struct ProgressRow: View {
     return ProgressSummaryView(progress: previewProgress)
         .padding()
 } 
+
