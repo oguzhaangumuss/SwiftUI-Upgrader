@@ -8,7 +8,8 @@
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -124,5 +125,7 @@ iOSInjectionProject/
 SwiftUI Gym TrackerTests/
 SwiftUI Gym TrackerUITests/
 
+# API Keys ve Credentials
+SwiftUI\ Gym\ Tracker/Config/APIKeys.swift
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,macos
