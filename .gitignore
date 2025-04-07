@@ -127,5 +127,6 @@ SwiftUI Gym TrackerUITests/
 
 # API Keys ve Credentials
 SwiftUI\ Gym\ Tracker/Config/APIKeys.swift
+fitnessappv2-private-key.json
 
 # End of https://www.toptal.com/developers/gitignore/api/swift,macos
