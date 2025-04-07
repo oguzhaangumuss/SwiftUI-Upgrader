@@ -4,6 +4,7 @@ import FirebaseFirestore
 struct AdminPanelView: View {
     @StateObject private var viewModel = AdminViewModel()
     @State private var showingExerciseSeeder = false
+    @State private var showingFoodSeeder = false
     
     var body: some View {
         List {
@@ -36,6 +37,12 @@ struct AdminPanelView: View {
                 } label: {
                     Label("Egzersiz Yükleyici", systemImage: "square.and.arrow.down.fill")
                 }
+                
+                Button {
+                    showingFoodSeeder = true
+                } label: {
+                    Label("Besin Yükleyici", systemImage: "square.and.arrow.down.fill")
+                }
             }
         }
         .navigationTitle("Admin Paneli")
@@ -44,6 +51,9 @@ struct AdminPanelView: View {
         }
         .sheet(isPresented: $showingExerciseSeeder) {
             AdminExerciseSeederView()
+        }
+        .sheet(isPresented: $showingFoodSeeder) {
+            AdminFoodSeederView()
         }
     }
 }

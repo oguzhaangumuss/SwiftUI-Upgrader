@@ -115,7 +115,7 @@ struct WeeklyBalanceChart: View {
 }
 
 struct FoodDistributionChart: View {
-    let data: [FoodData]
+    let data: [FoodCalorieData]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

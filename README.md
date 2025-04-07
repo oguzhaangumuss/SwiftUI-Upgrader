@@ -105,4 +105,9 @@ The database schema is defined in `database_schema.ts` and includes collections 
 
 ## Contact
 
-[Include contact information here]
+## Contact
+
+[![linkedin](https://img.shields.io/badge/Linkedin-000000?style=for-the-badge&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/oğuzhan-gümüş-755739197/)
+[![Twitter](https://img.shields.io/badge/Twitter-000000?style=for-the-badge&logo=Twitter&logoColor=white)](https://twitter.com/ozziecrypt)
+[![Github](https://img.shields.io/badge/Github-000000?style=for-the-badge&logo=Github&logoColor=white)](https://github.com/oguzhaangumuss)
+[![Email](https://img.shields.io/badge/email-000000?style=for-the-badge&logo=email&logoColor=white)](oguzhaangumuss@gmail.com)

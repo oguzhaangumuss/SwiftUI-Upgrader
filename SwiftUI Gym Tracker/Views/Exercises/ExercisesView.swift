@@ -1,3 +1,10 @@
+//
+//  ExercisesView.swift
+//  SwiftUI Gym Tracker
+//
+//  Created by oguzhangumus on 12.01.2025.
+//
+
 import SwiftUI
 
 struct ExercisesView: View {

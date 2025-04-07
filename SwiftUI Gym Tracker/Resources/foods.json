@@ -1,0 +1,420 @@
+{
+  "foods": [
+    {
+      "name": "Elma",
+      "brand": "Genel",
+      "calories": 52,
+      "protein": 0.3,
+      "carbs": 14.0,
+      "fat": 0.2
+    },
+    {
+      "name": "Muz",
+      "brand": "Genel",
+      "calories": 89,
+      "protein": 1.1,
+      "carbs": 22.8,
+      "fat": 0.3
+    },
+    {
+      "name": "Tavuk Göğsü (Pişmiş)",
+      "brand": "Genel",
+      "calories": 165,
+      "protein": 31.0,
+      "carbs": 0.0,
+      "fat": 3.6
+    },
+    {
+      "name": "Somon (Pişmiş)",
+      "brand": "Genel",
+      "calories": 206,
+      "protein": 22.1,
+      "carbs": 0.0,
+      "fat": 12.4
+    },
+    {
+      "name": "Yumurta",
+      "brand": "Genel",
+      "calories": 155,
+      "protein": 12.6,
+      "carbs": 1.1,
+      "fat": 10.6
+    },
+    {
+      "name": "Tam Yağlı Süt",
+      "brand": "Genel",
+      "calories": 61,
+      "protein": 3.2,
+      "carbs": 4.8,
+      "fat": 3.3
+    },
+    {
+      "name": "Yoğurt (Sade)",
+      "brand": "Genel",
+      "calories": 59,
+      "protein": 3.5,
+      "carbs": 4.7,
+      "fat": 3.0
+    },
+    {
+      "name": "Tam Buğday Ekmeği",
+      "brand": "Genel",
+      "calories": 266,
+      "protein": 10.7,
+      "carbs": 47.2,
+      "fat": 3.2
+    },
+    {
+      "name": "Beyaz Pirinç (Pişmiş)",
+      "brand": "Genel",
+      "calories": 130,
+      "protein": 2.7,
+      "carbs": 28.0,
+      "fat": 0.3
+    },
+    {
+      "name": "Bulgur (Pişmiş)",
+      "brand": "Genel",
+      "calories": 83,
+      "protein": 3.1,
+      "carbs": 18.6,
+      "fat": 0.2
+    },
+    {
+      "name": "Mercimek (Pişmiş)",
+      "brand": "Genel",
+      "calories": 116,
+      "protein": 9.0,
+      "carbs": 20.0,
+      "fat": 0.4
+    },
+    {
+      "name": "Nohut (Pişmiş)",
+      "brand": "Genel",
+      "calories": 164,
+      "protein": 8.9,
+      "carbs": 27.0,
+      "fat": 2.6
+    },
+    {
+      "name": "Avokado",
+      "brand": "Genel",
+      "calories": 160,
+      "protein": 2.0,
+      "carbs": 8.5,
+      "fat": 14.7
+    },
+    {
+      "name": "Fındık",
+      "brand": "Genel",
+      "calories": 628,
+      "protein": 15.0,
+      "carbs": 16.7,
+      "fat": 60.8
+    },
+    {
+      "name": "Ceviz",
+      "brand": "Genel",
+      "calories": 654,
+      "protein": 15.2,
+      "carbs": 13.7,
+      "fat": 65.2
+    },
+    {
+      "name": "Badem",
+      "brand": "Genel",
+      "calories": 576,
+      "protein": 21.2,
+      "carbs": 21.6,
+      "fat": 49.9
+    },
+    {
+      "name": "Kırmızı Et (Dana, Yağsız)",
+      "brand": "Genel",
+      "calories": 250,
+      "protein": 26.0,
+      "carbs": 0.0,
+      "fat": 17.0
+    },
+    {
+      "name": "Lor Peyniri",
+      "brand": "Genel",
+      "calories": 98,
+      "protein": 11.1,
+      "carbs": 3.4,
+      "fat": 4.3
+    },
+    {
+      "name": "Beyaz Peynir",
+      "brand": "Genel",
+      "calories": 264,
+      "protein": 14.2,
+      "carbs": 4.1,
+      "fat": 21.3
+    },
+    {
+      "name": "Kaşar Peyniri",
+      "brand": "Genel",
+      "calories": 350,
+      "protein": 23.0,
+      "carbs": 1.3,
+      "fat": 28.0
+    },
+    {
+      "name": "Zeytin (Siyah)",
+      "brand": "Genel",
+      "calories": 115,
+      "protein": 0.8,
+      "carbs": 6.3,
+      "fat": 10.7
+    },
+    {
+      "name": "Zeytinyağı",
+      "brand": "Genel",
+      "calories": 884,
+      "protein": 0.0,
+      "carbs": 0.0,
+      "fat": 100.0
+    },
+    {
+      "name": "Yeşil Mercimek (Pişmiş)",
+      "brand": "Genel",
+      "calories": 120,
+      "protein": 8.8,
+      "carbs": 21.0,
+      "fat": 0.4
+    },
+    {
+      "name": "Mısır (Haşlanmış)",
+      "brand": "Genel",
+      "calories": 86,
+      "protein": 3.2,
+      "carbs": 19.0,
+      "fat": 1.2
+    },
+    {
+      "name": "Patates (Haşlanmış)",
+      "brand": "Genel",
+      "calories": 87,
+      "protein": 1.9,
+      "carbs": 20.1,
+      "fat": 0.1
+    },
+    {
+      "name": "Yulaflı Müsli",
+      "brand": "Genel",
+      "calories": 370,
+      "protein": 11.0,
+      "carbs": 67.0,
+      "fat": 7.5
+    },
+    {
+      "name": "Yulaf Ezmesi",
+      "brand": "Genel",
+      "calories": 379,
+      "protein": 13.2,
+      "carbs": 67.7,
+      "fat": 6.9
+    },
+    {
+      "name": "Çilek",
+      "brand": "Genel",
+      "calories": 32,
+      "protein": 0.7,
+      "carbs": 7.7,
+      "fat": 0.3
+    },
+    {
+      "name": "Portakal",
+      "brand": "Genel",
+      "calories": 49,
+      "protein": 0.9,
+      "carbs": 13.0,
+      "fat": 0.1
+    },
+    {
+      "name": "Kivi",
+      "brand": "Genel",
+      "calories": 61,
+      "protein": 1.1,
+      "carbs": 14.7,
+      "fat": 0.5
+    },
+    {
+      "name": "Domates",
+      "brand": "Genel",
+      "calories": 18,
+      "protein": 0.9,
+      "carbs": 3.9,
+      "fat": 0.2
+    },
+    {
+      "name": "Salatalık",
+      "brand": "Genel",
+      "calories": 15,
+      "protein": 0.7,
+      "carbs": 3.6,
+      "fat": 0.1
+    },
+    {
+      "name": "Havuç",
+      "brand": "Genel",
+      "calories": 41,
+      "protein": 0.9,
+      "carbs": 9.6,
+      "fat": 0.2
+    },
+    {
+      "name": "Ispanak",
+      "brand": "Genel",
+      "calories": 23,
+      "protein": 2.9,
+      "carbs": 3.6,
+      "fat": 0.4
+    },
+    {
+      "name": "Brokoli",
+      "brand": "Genel",
+      "calories": 34,
+      "protein": 2.8,
+      "carbs": 6.6,
+      "fat": 0.4
+    },
+    {
+      "name": "Karnabahar",
+      "brand": "Genel",
+      "calories": 25,
+      "protein": 1.9,
+      "carbs": 5.0,
+      "fat": 0.3
+    },
+    {
+      "name": "Balkabağı",
+      "brand": "Genel",
+      "calories": 26,
+      "protein": 1.0,
+      "carbs": 6.5,
+      "fat": 0.1
+    },
+    {
+      "name": "Kuru Kayısı",
+      "brand": "Genel",
+      "calories": 241,
+      "protein": 3.4,
+      "carbs": 62.6,
+      "fat": 0.5
+    },
+    {
+      "name": "Kuru Üzüm",
+      "brand": "Genel",
+      "calories": 299,
+      "protein": 3.1,
+      "carbs": 79.2,
+      "fat": 0.5
+    },
+    {
+      "name": "Yer Fıstığı",
+      "brand": "Genel",
+      "calories": 567,
+      "protein": 25.8,
+      "carbs": 16.1,
+      "fat": 49.2
+    },
+    {
+      "name": "Fıstık Ezmesi",
+      "brand": "Genel",
+      "calories": 588,
+      "protein": 22.2,
+      "carbs": 22.3,
+      "fat": 49.9
+    },
+    {
+      "name": "Bal",
+      "brand": "Genel",
+      "calories": 304,
+      "protein": 0.3,
+      "carbs": 82.4,
+      "fat": 0.0
+    },
+    {
+      "name": "Ton Balığı (Suda)",
+      "brand": "Genel",
+      "calories": 109,
+      "protein": 24.0,
+      "carbs": 0.0,
+      "fat": 0.8
+    },
+    {
+      "name": "Ton Balığı (Yağda)",
+      "brand": "Genel",
+      "calories": 198,
+      "protein": 29.0,
+      "carbs": 0.0,
+      "fat": 8.0
+    },
+    {
+      "name": "Tavuk Butu (Derili)",
+      "brand": "Genel",
+      "calories": 184,
+      "protein": 18.2,
+      "carbs": 0.0,
+      "fat": 12.3
+    },
+    {
+      "name": "Hindi Göğsü",
+      "brand": "Genel",
+      "calories": 135,
+      "protein": 29.0,
+      "carbs": 0.0,
+      "fat": 2.0
+    },
+    {
+      "name": "Kefir",
+      "brand": "Genel",
+      "calories": 63,
+      "protein": 3.3,
+      "carbs": 4.8,
+      "fat": 3.5
+    },
+    {
+      "name": "Labne",
+      "brand": "Genel",
+      "calories": 160,
+      "protein": 6.0,
+      "carbs": 4.0,
+      "fat": 14.0
+    },
+    {
+      "name": "Süzme Yoğurt",
+      "brand": "Genel",
+      "calories": 95,
+      "protein": 10.0,
+      "carbs": 3.5,
+      "fat": 5.0
+    },
+    {
+      "name": "Greyfurt",
+      "brand": "Genel",
+      "calories": 42,
+      "protein": 0.8,
+      "carbs": 10.7,
+      "fat": 0.1
+    },
+    {
+      "name": "Ahududu",
+      "brand": "Genel",
+      "calories": 52,
+      "protein": 1.2,
+      "carbs": 11.9,
+      "fat": 0.7
+    },
+    {
+      "name": "Yaban Mersini",
+      "brand": "Genel",
+      "calories": 57,
+      "protein": 0.7,
+      "carbs": 14.5,
+      "fat": 0.3
+    }
+  ]
+}

@@ -1,3 +1,13 @@
+// 
+//  AddToWorkoutView.swift
+//  SwiftUI Gym Tracker
+//
+//  Created by oguzhangumus on 12.01.2025.
+//
+
+// Bu view antrenmana egzersiz ekler.
+
+
 import SwiftUI
 import FirebaseFirestore
 

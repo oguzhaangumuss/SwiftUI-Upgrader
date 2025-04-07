@@ -104,7 +104,7 @@ struct DayCalories: Identifiable {
     let burned: Double
 }
 
-struct FoodData: Identifiable {
+struct FoodCalorieData: Identifiable {
     let id = UUID()
     let name: String
     let calories: Double
