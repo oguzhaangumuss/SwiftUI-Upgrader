@@ -1,4 +1,5 @@
 import FirebaseFirestore
+import Foundation
 
 struct UserExercise: Identifiable, Codable {
     @DocumentID var id: String?
@@ -10,7 +11,7 @@ struct UserExercise: Identifiable, Codable {
     var weight: Double
     let date: Timestamp
     let notes: String?
-    let duration: TimeInterval  // Egzersiz süresi (saniye)
+    let duration: Double  // TimeInterval yerine Double kullanıyoruz
     private let _caloriesBurned: Double? // Firebase'den gelen kalori değeri
     let createdAt: Timestamp
     
@@ -22,7 +23,7 @@ struct UserExercise: Identifiable, Codable {
         }
         
         // Firebase'den gelen değer yoksa hesapla
-        let hours = duration / 3600 // Süreyi saate çevir
+        let hours = duration / 3600.0 // Süreyi saate çevir (Double olarak bölme işlemi)
         let userWeight = FirebaseManager.shared.currentUser?.weight ?? 70 // Varsayılan ağırlık
         // Saatte yakılan kalori = MET * ağırlık * saat
         return (7.0 * userWeight * hours) // Varsayılan MET değeri 7.0 (orta şiddetli egzersiz)

@@ -11,9 +11,6 @@ struct CalorieChartView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Günlük Kalori Özeti")
-                .font(.headline)
-            
             Chart {
                 BarMark(
                     x: .value("Tür", "Alınan"),

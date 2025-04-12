@@ -1,4 +1,5 @@
 import FirebaseFirestore
+import Foundation
 
 enum MuscleGroup: String, Codable, CaseIterable {
     case chest = "Göğüs"
@@ -40,10 +41,10 @@ struct Exercise: Identifiable, Codable {
 }
 
 extension Exercise {
-    func calculateCalories(weight: Double, duration: TimeInterval) -> Double? {
+    func calculateCalories(weight: Double, duration: Double) -> Double? {
         guard let metValue = metValue else { return nil }
         
-        let hours = duration / 3600  // saniyeyi saate çevir
+        let hours = duration / 3600.0  // saniyeyi saate çevir (Double olarak bölme)
         return metValue * weight * hours
     }
 }

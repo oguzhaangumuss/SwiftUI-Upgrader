@@ -10,37 +10,82 @@ class MealsViewModel: ObservableObject {
     
     @MainActor
     func fetchMeals(for date: Date) async {
-        isLoading = true
-        meals = []
+        await MainActor.run {
+            isLoading = true
+            meals = []
+        }
         
-        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else {
-            isLoading = false
-            return
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        await fetchMealsBetween(start: startOfDay, end: endOfDay)
+    }
+    
+    func fetchMealsForWeek(startDate: Date) async {
+        await MainActor.run {
+            isLoading = true
+            meals = []
         }
         
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: date)
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        let startOfWeek = calendar.startOfDay(for: startDate)
+        let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek)!
         
-        do {
-            let snapshot = try await db.collection("userMeals")
-                .whereField("userId", isEqualTo: userId)
-                .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: startOfDay))
-                .whereField("date", isLessThan: Timestamp(date: endOfDay))
-                .order(by: "date")
-                .getDocuments()
-            
-            meals = snapshot.documents.compactMap { try? $0.data(as: UserMeal.self) }
-        } catch {
-            print("Öğünler getirilemedi: \(error)")
+        await fetchMealsBetween(start: startOfWeek, end: endOfWeek)
+    }
+    
+    func fetchMealsForMonth(startDate: Date) async {
+        await MainActor.run {
+            isLoading = true
+            meals = []
         }
         
-        isLoading = false
+        let calendar = Calendar.current
+        let startOfMonth = calendar.startOfDay(for: startDate)
+        
+        var components = DateComponents()
+        components.month = 1
+        let endOfMonth = calendar.date(byAdding: components, to: startOfMonth)!
+        
+        await fetchMealsBetween(start: startOfMonth, end: endOfMonth)
+    }
+    
+    private func fetchMealsBetween(start: Date, end: Date) async {
+        guard let userId = FirebaseManager.shared.auth.currentUser?.uid else {
+            await MainActor.run {
+                isLoading = false
+            }
+            return
+        }
+        
+        do {
+            let snapshot = try await FirebaseManager.shared.firestore
+                .collection("userMeals")
+                .whereField("userId", isEqualTo: userId)
+                .whereField("date", isGreaterThanOrEqualTo: Timestamp(date: start))
+                .whereField("date", isLessThan: Timestamp(date: end))
+                .getDocuments()
+            
+            let fetchedMeals = snapshot.documents.compactMap { document -> UserMeal? in
+                try? document.data(as: UserMeal.self)
+            }
+            
+            await MainActor.run {
+                self.meals = fetchedMeals.sorted(by: { $0.date.dateValue() < $1.date.dateValue() })
+                self.isLoading = false
+            }
+            
+        } catch {
+            print("Error fetching meals: \(error)")
+            await MainActor.run {
+                isLoading = false
+            }
+        }
     }
     
     func meals(for type: MealType) -> [UserMeal]? {
-        let typeMeals = meals.filter { $0.mealType == type }
-        return typeMeals.isEmpty ? nil : typeMeals
+        let mealsForType = meals.filter { $0.mealType == type }
+        return mealsForType.isEmpty ? nil : mealsForType
     }
     
     func calculateDailySummary() -> NutritionSummary {
@@ -49,11 +94,12 @@ class MealsViewModel: ObservableObject {
         for meal in meals {
             for mealFood in meal.foods {
                 if let food = foodsViewModel.getFood(by: mealFood.foodId) {
-                    let portion = mealFood.portion / 100.0 // gram to percentage
-                    summary.calories += Int(food.calories * portion)
-                    summary.protein += food.protein * portion
-                    summary.carbs += food.carbs * portion
-                    summary.fat += food.fat * portion
+                    let portionMultiplier = mealFood.portion / 100.0
+                    
+                    summary.calories += Int(Double(food.calories) * portionMultiplier)
+                    summary.protein += food.protein * portionMultiplier
+                    summary.carbs += food.carbs * portionMultiplier
+                    summary.fat += food.fat * portionMultiplier
                 }
             }
         }

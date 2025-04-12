@@ -4,6 +4,8 @@ struct FloatingAIButton: View {
     @Binding var showingAIAssistant: Bool
     @State private var dragAmount = CGSize.zero
     @State private var buttonPosition = CGPoint(x: UIScreen.main.bounds.width - 80, y: UIScreen.main.bounds.height - 160)
+    @State private var showingHideConfirmation = false
+    @State private var showingLongPressMenu = false
     
     var body: some View {
         Button {
@@ -58,6 +60,27 @@ struct FloatingAIButton: View {
                     self.dragAmount = .zero
                 }
         )
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .onEnded { _ in
+                    showingLongPressMenu = true
+                }
+        )
+        .confirmationDialog("AI Asistanı", isPresented: $showingLongPressMenu) {
+            Button("Gizle", role: .destructive) {
+                showingHideConfirmation = true
+            }
+            Button("İptal", role: .cancel) {}
+        }
+        .alert("AI Asistanı Gizle", isPresented: $showingHideConfirmation) {
+            Button("İptal", role: .cancel) {}
+            Button("Gizle", role: .destructive) {
+                UserDefaults.standard.set(false, forKey: "showAIAssistant")
+                NotificationCenter.default.post(name: NSNotification.Name("AIAssistantVisibilityChanged"), object: nil)
+            }
+        } message: {
+            Text("AI asistanı gizlenecek. Tekrar görünür yapmak için Ayarlar > Gizlilik kısmından aktifleştirebilirsiniz.")
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct QuickStartWorkoutView: View {
     @StateObject private var viewModel = ActiveWorkoutViewModel()
@@ -158,10 +159,10 @@ struct QuickStartWorkoutView: View {
     }
     
     // MARK: - Helper Methods
-    private func formatTime(_ timeInterval: TimeInterval) -> String {
-        let hours = Int(timeInterval) / 3600
-        let minutes = Int(timeInterval) / 60 % 60
-        let seconds = Int(timeInterval) % 60
+    private func formatTime(_ duration: Double) -> String {
+        let hours = Int(duration / 3600.0)
+        let minutes = Int(duration / 60.0) % 60
+        let seconds = Int(duration) % 60
         
         if hours > 0 {
             return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
@@ -171,7 +172,18 @@ struct QuickStartWorkoutView: View {
     }
     
     private func saveAsTemplate(name: String, groupId: String) async {
-        let templateExercises = viewModel.exercises.map { $0.toTemplateExercise() }
+        let templateExercises = viewModel.exercises.map { exercise -> TemplateExercise in
+            return TemplateExercise(
+                id: UUID().uuidString,
+                exerciseId: exercise.exerciseId,
+                exerciseName: exercise.exerciseName,
+                sets: exercise.sets.count,
+                reps: exercise.sets.first?.reps ?? 0,
+                weight: exercise.sets.first?.weight ?? 0,
+                notes: exercise.notes
+            )
+        }
+        
         // Template kaydetme işlemleri burada yapılacak
         // CreateTemplateViewModel'deki saveTemplate metodunu örnek alabilirsiniz
     }

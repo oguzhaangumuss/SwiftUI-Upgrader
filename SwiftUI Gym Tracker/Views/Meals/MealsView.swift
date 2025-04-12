@@ -1,10 +1,18 @@
 import SwiftUI
 import FirebaseFirestore
 
+// Görüntüleme periyotlarını tanımlayan enum
+enum MealPeriod: String, CaseIterable {
+    case daily = "Günlük"
+    case weekly = "Haftalık"
+    case monthly = "Aylık"
+}
+
 struct MealsView: View {
     @StateObject private var viewModel = MealsViewModel()
     @State private var selectedDate = Date()
     @State private var showingDatePicker = false
+    @State private var selectedPeriod: MealPeriod = .daily
     
     var body: some View {
         NavigationView {
@@ -15,6 +23,16 @@ struct MealsView: View {
                     showingDatePicker: $showingDatePicker
                 )
                 
+                // Periyot seçimi için segmented control
+                Picker("Periyot", selection: $selectedPeriod) {
+                    ForEach(MealPeriod.allCases, id: \.self) { period in
+                        Text(period.rawValue).tag(period)
+                    }
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                
                 // Öğün listesi
                 List {
                     if viewModel.isLoading {
@@ -22,7 +40,7 @@ struct MealsView: View {
                     } else if viewModel.meals.isEmpty {
                         EmptyStateView(
                             image: "fork.knife.circle",
-                            message: "Bugün için öğün bulunmuyor"
+                            message: selectedPeriod == .daily ? "Bugün için öğün bulunmuyor" : "Bu periyotta öğün bulunmuyor"
                         )
                     } else {
                         ForEach(MealType.allCases, id: \.self) { mealType in
@@ -37,23 +55,22 @@ struct MealsView: View {
                     }
                 }
                 
-                // Günlük özet
+                // Periyota göre özet
                 if !viewModel.meals.isEmpty {
                     let summary = viewModel.calculateDailySummary()
                     DailyNutritionSummary(summary: summary)
                 }
             }
-            .navigationTitle("Öğünlerim")
+            .navigationTitle(navigationTitle)
         }
         .onChange(of: selectedDate) { _ in
-            Task {
-                await viewModel.fetchMeals(for: selectedDate)
-            }
+            fetchMealsForSelectedPeriod()
+        }
+        .onChange(of: selectedPeriod) { _ in
+            fetchMealsForSelectedPeriod()
         }
         .onAppear {
-            Task {
-                await viewModel.fetchMeals(for: selectedDate)
-            }
+            fetchMealsForSelectedPeriod()
         }
         .sheet(isPresented: $showingDatePicker) {
             NavigationView {
@@ -71,6 +88,46 @@ struct MealsView: View {
                 )
             }
         }
+    }
+    
+    // Seçilen periyota göre başlık belirleme
+    private var navigationTitle: String {
+        switch selectedPeriod {
+        case .daily:
+            return "Günlük Öğünlerim"
+        case .weekly:
+            return "Haftalık Öğünlerim"
+        case .monthly:
+            return "Aylık Öğünlerim"
+        }
+    }
+    
+    // Seçilen periyota göre veri çekme
+    private func fetchMealsForSelectedPeriod() {
+        Task {
+            switch selectedPeriod {
+            case .daily:
+                await viewModel.fetchMeals(for: selectedDate)
+            case .weekly:
+                await viewModel.fetchMealsForWeek(startDate: getWeekStartDate())
+            case .monthly:
+                await viewModel.fetchMealsForMonth(startDate: getMonthStartDate())
+            }
+        }
+    }
+    
+    // Haftanın başlangıç tarihini hesaplama
+    private func getWeekStartDate() -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: selectedDate)
+        return calendar.date(from: components) ?? selectedDate
+    }
+    
+    // Ayın başlangıç tarihini hesaplama
+    private func getMonthStartDate() -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: selectedDate)
+        return calendar.date(from: components) ?? selectedDate
     }
 }
 

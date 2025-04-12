@@ -4,6 +4,7 @@ struct SettingsSheet: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showingDeleteAccountAlert = false
+    @State private var showAIAssistant: Bool = true
     
     var body: some View {
         NavigationView {
@@ -21,6 +22,17 @@ struct SettingsSheet: View {
                             Label("Profili Düzenle", systemImage: "person.circle")
                         }
                         .disabled(viewModel.user == nil)
+                    }
+                    
+                    // AI Asistanı Ayarları
+                    Section("AI Asistanı") {
+                        Toggle(isOn: $showAIAssistant) {
+                            Label("AI Asistanı Görünür", systemImage: "face.smiling")
+                        }
+                        .onChange(of: showAIAssistant) { newValue in
+                            UserDefaults.standard.set(newValue, forKey: "showAIAssistant")
+                            NotificationCenter.default.post(name: NSNotification.Name("AIAssistantVisibilityChanged"), object: nil)
+                        }
                     }
                     
                     // Hesap İşlemleri
@@ -57,6 +69,9 @@ struct SettingsSheet: View {
                 Text("Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")
             }
             .onAppear {
+                // UserDefaults'tan AI asistanının görünürlük durumunu al
+                showAIAssistant = UserDefaults.standard.object(forKey: "showAIAssistant") as? Bool ?? true
+                
                 Task {
                     await viewModel.fetchUserData()
                 }

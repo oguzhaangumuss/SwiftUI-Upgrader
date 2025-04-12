@@ -33,8 +33,7 @@ struct ProgressSummaryView: View {
                 
                 // Kilo Hedefi İlerlemesi
                 if let weightProgress = progress.weightProgress {
-                    ProgressRow(
-                        title: "Kilo",
+                    WeightProgressRow(
                         current: weightProgress.current,
                         target: weightProgress.target,
                         unit: "kg",
@@ -46,6 +45,76 @@ struct ProgressSummaryView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+}
+
+// Özel kilo ilerleme satırı
+private struct WeightProgressRow: View {
+    let current: Double
+    let target: Double
+    let unit: String
+    let color: Color
+    
+    private var isWeightLoss: Bool {
+        target < current // Hedef, mevcut kilodan düşükse kilo vermek istiyor
+    }
+    
+    private var isWeightGain: Bool {
+        target > current // Hedef, mevcut kilodan yüksekse kilo almak istiyor
+    }
+    
+    private var progress: Double {
+        if isWeightLoss {
+            // Kilo vermek isteniyorsa: Başlangıç - Şimdiki / Başlangıç - Hedef
+            // Örnek: 90 kilodan 80 kiloya düşmek istiyor, şu an 85 kilo
+            // İlerleme: (90 - 85) / (90 - 80) = 5 / 10 = 0.5 (%50)
+            let initialWeight = FirebaseManager.shared.currentUser?.initialWeight ?? current
+            return min(max((initialWeight - current) / (initialWeight - target), 0), 1.0)
+        } else if isWeightGain {
+            // Kilo almak isteniyorsa: Şimdiki - Başlangıç / Hedef - Başlangıç
+            // Örnek: 70 kilodan 80 kiloya çıkmak istiyor, şu an 75 kilo
+            // İlerleme: (75 - 70) / (80 - 70) = 5 / 10 = 0.5 (%50)
+            let initialWeight = FirebaseManager.shared.currentUser?.initialWeight ?? current
+            return min(max((current - initialWeight) / (target - initialWeight), 0), 1.0)
+        } else {
+            // Hedef = Şimdiki kilo, zaten hedefe ulaşmış
+            return 1.0
+        }
+    }
+    
+    var weightGoalText: String {
+        if isWeightLoss {
+            return "Kilo Verme Hedefi"
+        } else if isWeightGain {
+            return "Kilo Alma Hedefi"
+        } else {
+            return "Kilo Hedefi"
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(weightGoalText)
+                    .font(.subheadline)
+                Spacer()
+                Text("\(String(format: "%.1f", current))/\(String(format: "%.1f", target)) \(unit)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            ProgressView(value: progress)
+                .tint(color)
+                .background(color.opacity(0.2))
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .overlay(
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .padding(.leading, 4),
+                    alignment: .leading
+                )
+        }
     }
 }
 

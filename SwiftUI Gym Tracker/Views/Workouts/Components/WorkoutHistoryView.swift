@@ -171,11 +171,11 @@ struct WorkoutHistoryCard: View {
     }
 }
 
-// TimeInterval için formatlama extension'ı
-extension TimeInterval {
+// Double için formatlama extension'ı
+extension Double {
     var formattedDuration: String {
-        let hours = Int(self) / 3600
-        let minutes = Int(self) / 60 % 60
+        let hours = Int(self / 3600.0)
+        let minutes = Int(self / 60.0) % 60
         
         if hours > 0 {
             return "\(hours) sa \(minutes) dk"
@@ -183,4 +183,18 @@ extension TimeInterval {
             return "\(minutes) dk"
         }
     }
-} 
+}
+
+// TimeInterval için formatlama extension'ı
+//extension TimeInterval {
+//    var formattedDuration: String {
+//        let hours = Int(self) / 3600
+//        let minutes = Int(self) / 60 % 60
+//        
+//        if hours > 0 {
+//            return "\(hours) sa \(minutes) dk"
+//        } else {
+//            return "\(minutes) dk"
+//        }
+//    }
+//} 

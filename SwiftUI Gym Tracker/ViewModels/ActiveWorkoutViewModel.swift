@@ -1,9 +1,10 @@
 import SwiftUI
 import FirebaseFirestore
+import Foundation
 
 class ActiveWorkoutViewModel: ObservableObject {
     @Published var exercises: [ActiveWorkoutExercise] = []
-    @Published var elapsedTime: TimeInterval = 0
+    @Published var elapsedTime: Double = 0
     private var timer: Timer?
     private var startTime: Date = Date()
     @Published var workoutName: String = "Antrenman"
@@ -67,7 +68,7 @@ class ActiveWorkoutViewModel: ObservableObject {
         return total
     }
     
-    private func calculateCaloriesBurned(duration: TimeInterval) async -> Double {
+    private func calculateCaloriesBurned(duration: Double) async -> Double {
         // Her egzersiz için kalori hesapla
         var totalCalories: Double = 0
         

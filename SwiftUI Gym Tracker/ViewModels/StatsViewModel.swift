@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseFirestore
+import Foundation
 
 class StatsViewModel: ObservableObject {
     // MARK: - Veri Modelleri
@@ -15,7 +16,7 @@ class StatsViewModel: ObservableObject {
         let id = UUID()
         let date: Date
         var workoutCount: Int
-        var duration: TimeInterval
+        var duration: Double
     }
     
     struct CalorieData: Identifiable {
@@ -52,7 +53,7 @@ class StatsViewModel: ObservableObject {
             return ActivityData(
                 date: workout.date.dateValue(),
                 workoutCount: 1,
-                duration: workout.duration ?? 0
+                duration: workout.duration ?? 0.0
             )
         }
     }

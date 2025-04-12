@@ -10,6 +10,7 @@
 
 import SwiftUI
 import FirebaseFirestore
+import Foundation
 
 struct AddToWorkoutView: View {
     @Environment(\.dismiss) var dismiss
@@ -100,7 +101,7 @@ struct AddToWorkoutView: View {
             return
         }
         
-        let duration = TimeInterval(hoursInt * 3600 + minutesInt * 60)
+        let duration = Double(hoursInt * 3600 + minutesInt * 60)
         
         // Kalori hesaplama
         let caloriesBurned = exercise.calculateCalories(

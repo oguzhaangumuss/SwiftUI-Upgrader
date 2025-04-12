@@ -1,4 +1,5 @@
 import FirebaseFirestore
+import Foundation
 
 class ExerciseStatsViewModel: ObservableObject {
     @Published var currentStats = ExerciseStats()
@@ -72,7 +73,7 @@ class ExerciseStatsViewModel: ObservableObject {
 struct ExerciseStats {
     var totalCalories: Double = 0
     var totalWorkouts: Int = 0
-    var totalDuration: TimeInterval = 0
+    var totalDuration: Double = 0
 }
 
 struct CaloriesDataPoint: Identifiable {

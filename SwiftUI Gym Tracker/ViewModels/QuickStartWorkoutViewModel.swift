@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseFirestore
+import Foundation
 
 
 class QuickStartWorkoutViewModel: ObservableObject {
@@ -9,7 +10,7 @@ class QuickStartWorkoutViewModel: ObservableObject {
             handleSelectedExercisesChange()
         }
     }
-    @Published var elapsedTime: TimeInterval = 0
+    @Published var elapsedTime: Double = 0
     @Published var isTimerRunning = false
     @Published var errorMessage: String?
     
@@ -84,7 +85,7 @@ class QuickStartWorkoutViewModel: ObservableObject {
         }
     }
     
-    private func saveExercisesToFirestore(exercises: [ActiveWorkoutExercise], duration: TimeInterval) async throws {
+    private func saveExercisesToFirestore(exercises: [ActiveWorkoutExercise], duration: Double) async throws {
         guard let userId = FirebaseManager.shared.auth.currentUser?.uid else {
             print("❌ Kullanıcı ID'si bulunamadı")
             return

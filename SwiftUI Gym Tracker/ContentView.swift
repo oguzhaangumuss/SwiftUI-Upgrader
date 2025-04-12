@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var showingSignIn = false
     @State private var previousUserId: String? = nil
     @State private var showingAIAssistant = false
+    @State private var showAIButton = true
     
     var body: some View {
         ZStack {
@@ -31,6 +32,9 @@ struct ContentView: View {
                 if Auth.auth().currentUser == nil {
                     showingSignIn = true
                 }
+                
+                // AI asistanı görünürlüğü için UserDefaults kontrolü
+                checkAIAssistantVisibility()
                 
                 // Log user status on appear instead of inside the View body
                 if let user = firebaseManager.currentUser {
@@ -54,8 +58,8 @@ struct ContentView: View {
                 }
             }
             
-            // Only show AI button if user is logged in
-            if firebaseManager.currentUser != nil {
+            // Only show AI button if user is logged in and button is not hidden
+            if firebaseManager.currentUser != nil && showAIButton {
                 FloatingAIButton(showingAIAssistant: $showingAIAssistant)
                     .zIndex(1) // Make sure button is above other UI elements
             }
@@ -63,6 +67,14 @@ struct ContentView: View {
         .sheet(isPresented: $showingAIAssistant) {
             AIAssistantView()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AIAssistantVisibilityChanged"))) { _ in
+            checkAIAssistantVisibility()
+        }
+    }
+    
+    private func checkAIAssistantVisibility() {
+        // Eğer UserDefaults'ta değer yoksa varsayılan olarak true kullan
+        showAIButton = UserDefaults.standard.object(forKey: "showAIAssistant") as? Bool ?? true
     }
 }
 

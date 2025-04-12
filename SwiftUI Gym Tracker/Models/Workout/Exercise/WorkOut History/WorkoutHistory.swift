@@ -1,4 +1,5 @@
 import FirebaseFirestore
+import Foundation
 
 struct WorkoutHistory: Identifiable, Codable {
     let id: String
@@ -6,7 +7,7 @@ struct WorkoutHistory: Identifiable, Codable {
     let templateId: String?
     let templateName: String
     let date: Timestamp
-    let duration: TimeInterval
+    let duration: Double // TimeInterval yerine Double kullanıyoruz çünkü TimeInterval zaten Double'dır
     let totalWeight: Double
     let caloriesBurned: Double
     let exercises: [HistoryExercise]
@@ -22,7 +23,27 @@ struct WorkoutHistory: Identifiable, Codable {
             "\(Int(weight)) kg x \(sets)"
         }
     }
+    
+    // Codable protokolü için özel kodlama/çözümleme
+    enum CodingKeys: String, CodingKey {
+        case id, userId, templateId, templateName, date, duration, totalWeight, caloriesBurned, exercises
+    }
+    
+    init(id: String, userId: String, templateId: String?, templateName: String, 
+         date: Timestamp, duration: Double, totalWeight: Double, caloriesBurned: Double, 
+         exercises: [HistoryExercise]) {
+        self.id = id
+        self.userId = userId
+        self.templateId = templateId
+        self.templateName = templateName
+        self.date = date
+        self.duration = duration
+        self.totalWeight = totalWeight
+        self.caloriesBurned = caloriesBurned
+        self.exercises = exercises
+    }
 }
+
 extension WorkoutHistory {
     func toDictionary() -> [String: Any] {
         return [
