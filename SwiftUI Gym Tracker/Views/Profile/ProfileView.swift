@@ -20,114 +20,116 @@ struct ProfileView: View {
     @State private var statsTimeInterval: TimeInterval = .daily
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // 1. Profil Başlığı
-                ProfileHeaderView(user: viewModel.user)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 24) {
+                    // 1. Profil Başlığı
+                    ProfileHeaderView(user: viewModel.user)
+                        .padding(.horizontal)
+                    
+                    // 2. Kalori Özeti
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text(timeIntervalTitle(for: calorieTimeInterval, base: "Kalori Özeti"))
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            Picker("", selection: $calorieTimeInterval) {
+                                ForEach(TimeInterval.allCases) { interval in
+                                    Text(interval.rawValue).tag(interval)
+                                }
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .frame(width: 200)
+                        }
+                        
+                        CalorieChartView(
+                            consumed: viewModel.getConsumedCalories(for: calorieTimeInterval),
+                            burned: viewModel.getBurnedCalories(for: calorieTimeInterval)
+                        )
+                    }
                     .padding(.horizontal)
-                
-                // 2. Kalori Özeti
-                VStack(spacing: 8) {
-                    HStack {
-                        Text(timeIntervalTitle(for: calorieTimeInterval, base: "Kalori Özeti"))
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Picker("", selection: $calorieTimeInterval) {
-                            ForEach(TimeInterval.allCases) { interval in
-                                Text(interval.rawValue).tag(interval)
+                    .onChange(of: calorieTimeInterval) { _ in
+                        Task {
+                            await viewModel.fetchStatsForTimeInterval(calorieTimeInterval)
+                        }
+                    }
+                    
+                    // 3. Günlük İstatistikler
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text(timeIntervalTitle(for: statsTimeInterval, base: "İstatistikler"))
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            Picker("", selection: $statsTimeInterval) {
+                                ForEach(TimeInterval.allCases) { interval in
+                                    Text(interval.rawValue).tag(interval)
+                                }
                             }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .frame(width: 200)
                         }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .frame(width: 200)
+                        
+                        QuickStatsView(stats: viewModel.getStats(for: statsTimeInterval))
+                    }
+                    .padding(.horizontal)
+                    .onChange(of: statsTimeInterval) { _ in
+                        Task {
+                            await viewModel.fetchStatsForTimeInterval(statsTimeInterval)
+                        }
                     }
                     
-                    CalorieChartView(
-                        consumed: viewModel.getConsumedCalories(for: calorieTimeInterval),
-                        burned: viewModel.getBurnedCalories(for: calorieTimeInterval)
-                    )
-                }
-                .padding(.horizontal)
-                .onChange(of: calorieTimeInterval) { _ in
-                    Task {
-                        await viewModel.fetchStatsForTimeInterval(calorieTimeInterval)
-                    }
-                }
-                
-                // 3. Günlük İstatistikler
-                VStack(spacing: 8) {
-                    HStack {
-                        Text(timeIntervalTitle(for: statsTimeInterval, base: "İstatistikler"))
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Picker("", selection: $statsTimeInterval) {
-                            ForEach(TimeInterval.allCases) { interval in
-                                Text(interval.rawValue).tag(interval)
+                    // 4. Hedefler Özeti
+                    VStack(spacing: 8) {
+                        HStack {
+                            Text("Hedeflerim")
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            NavigationLink("Tümü") {
+                                GoalsView()
                             }
+                            .font(.subheadline)
                         }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .frame(width: 200)
-                    }
-                    
-                    QuickStatsView(stats: viewModel.getStats(for: statsTimeInterval))
-                }
-                .padding(.horizontal)
-                .onChange(of: statsTimeInterval) { _ in
-                    Task {
-                        await viewModel.fetchStatsForTimeInterval(statsTimeInterval)
-                    }
-                }
-                
-                // 4. Hedefler Özeti
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("Hedeflerim")
-                            .font(.headline)
                         
-                        Spacer()
-                        
-                        NavigationLink("Tümü") {
-                            GoalsView()
-                        }
-                        .font(.subheadline)
+                        // Hedefler özet kartı
+                        GoalsSummaryView(viewModel: goalsViewModel)
                     }
-                    
-                    // Hedefler özet kartı
-                    GoalsSummaryView(viewModel: goalsViewModel)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+                .padding(.vertical)
             }
-            .padding(.vertical)
-        }
-        .navigationTitle("Profil")
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gear")
+            .navigationTitle("Profil")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gear")
+                    }
                 }
             }
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsSheet()
-        }
-        .onAppear {
-            Task {
-                await viewModel.fetchUserData()
-                await viewModel.fetchStatsForTimeInterval(.daily)
-                await goalsViewModel.fetchWeeklyWorkoutData()
-                goalsViewModel.fetchGoals()
+            .sheet(isPresented: $showingSettings) {
+                SettingsSheet()
             }
-        }
-        .refreshable {
-            Task {
-                await viewModel.fetchUserData()
-                await viewModel.fetchStatsForTimeInterval(calorieTimeInterval)
-                await viewModel.fetchStatsForTimeInterval(statsTimeInterval)
+            .onAppear {
+                Task {
+                    await viewModel.fetchUserData()
+                    await viewModel.fetchStatsForTimeInterval(.daily)
+                    await goalsViewModel.fetchWeeklyWorkoutData()
+                    goalsViewModel.fetchGoals()
+                }
+            }
+            .refreshable {
+                Task {
+                    await viewModel.fetchUserData()
+                    await viewModel.fetchStatsForTimeInterval(calorieTimeInterval)
+                    await viewModel.fetchStatsForTimeInterval(statsTimeInterval)
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ActiveExerciseSetupCard: View {
-    @Binding var exercise: ActiveWorkoutExercise
+    @Binding var exercise: ActiveExercise
     var onDelete: () -> Void
     
     var body: some View {
@@ -150,5 +150,5 @@ private struct RepsInputView: View {
 } 
 
 #Preview {
-    ActiveExerciseSetupCard(exercise: .constant(ActiveWorkoutExercise(exerciseId: "1", exerciseName: "Bench Press")), onDelete: {})
+    ActiveExerciseSetupCard(exercise: .constant(ActiveExercise(exerciseId: "1", exerciseName: "Bench Press")), onDelete: {})
 }

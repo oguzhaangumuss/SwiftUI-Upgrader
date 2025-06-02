@@ -132,7 +132,7 @@ struct LoginView: View {
             do {
                 let result = try await FirebaseManager.shared.auth.signIn(withEmail: email, password: password)
                 print("✅ Giriş başarılı: \(result.user.uid)")
-                await FirebaseManager.shared.fetchUserData(userId: result.user.uid)
+                await FirebaseManager.shared.fetchUserData(uid: result.user.uid)
             } catch {
                 print("❌ Giriş hatası: \(error.localizedDescription)")
                 await MainActor.run {

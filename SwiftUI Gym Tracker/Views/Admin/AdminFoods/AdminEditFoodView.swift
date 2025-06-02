@@ -12,6 +12,7 @@ struct AdminEditFoodView: View {
     @State private var fat: String
     @State private var errorMessage = ""
     @State private var isLoading = false
+    @State private var showImagePicker = false
     
     init(food: Food) {
         self.food = food
@@ -27,6 +28,50 @@ struct AdminEditFoodView: View {
             Form {
                 Section(header: Text("Yiyecek Bilgileri")) {
                     TextField("Yiyecek Adı", text: $name)
+                }
+                
+                Section(header: Text("Yiyecek Görseli")) {
+                    if let imageUrl = food.imageUrl, !imageUrl.isEmpty {
+                        HStack {
+                            AsyncImage(url: URL(string: imageUrl)) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                case .failure:
+                                    Image(systemName: "photo")
+                                @unknown default:
+                                    Image(systemName: "photo")
+                                }
+                            }
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(8)
+                            
+                            VStack(alignment: .leading) {
+                                Text("Mevcut Görsel")
+                                Text(imageUrl)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    } else {
+                        Text("Henüz görsel eklenmemiş")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Button {
+                        showImagePicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "photo")
+                            Text("Görsel Seç veya Değiştir")
+                        }
+                    }
                 }
                 
                 Section(header: Text("Besin Değerleri (100g için)")) {
@@ -60,6 +105,9 @@ struct AdminEditFoodView: View {
                 if isLoading {
                     ProgressView()
                 }
+            }
+            .sheet(isPresented: $showImagePicker) {
+                UpdateFoodImagesView(selectedFood: food)
             }
         }
     }
